@@ -122,14 +122,14 @@ ul li:hover .dropdown {
 }
 
 #part2 {
-  min-height: calc(100vh - 100px);
+  min-height: calc(100vh - 125px);
   display: flex;
   justify-content: space-between; /* empurra cada lado */
   align-items: center; /* mantém alinhado no meio da altura */
   padding: 80px 60px 40px 60px;
   background: linear-gradient(135deg, #f8fafc, #e2e8f0);
   margin-top: 100px;
-  width: 100%;
+  width: 100vw;
 }
 
 #textprinc {
