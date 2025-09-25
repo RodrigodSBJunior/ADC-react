@@ -39,6 +39,42 @@ const Home = () => {
           </p>
         </div>
       </div>
+
+      <div id="part4">
+        <h2>Como Funciona</h2>
+        <div className="steps-container">
+          <div className="step-item">
+            <div className="step-circle">1</div>
+            <div className="step-content">
+              <h3>Cadastre-se</h3>
+              <p>Crie sua conta em nossa plataforma de forma rápida e segura</p>
+            </div>
+          </div>
+          <div className="step-item">
+            <div className="step-circle">2</div>
+            <div className="step-content">
+              <h3>Escolha o Profissional</h3>
+              <p>Selecione o psicólogo que melhor atende suas necessidades</p>
+            </div>
+          </div>
+          <div className="step-item">
+            <div className="step-circle">3</div>
+            <div className="step-content">
+              <h3>Agende sua Consulta</h3>
+              <p>Marque o horário que funciona melhor para você</p>
+            </div>
+          </div>
+          <div className="step-item">
+            <div className="step-circle">4</div>
+            <div className="step-content">
+              <h3>Realize a Consulta</h3>
+              <p>Tenha sua sessão online ou presencial com total segurança</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
     </>
   );
 };

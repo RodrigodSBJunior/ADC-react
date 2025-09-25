@@ -7,6 +7,7 @@
 body {
     font-family: 'Arial', sans-serif;
     overflow-x: hidden;
+
 }
 
 #part2 {
@@ -124,4 +125,58 @@ body {
     font-size: 20px;
     display: block;
     margin-top: 15px;
+}
+
+#part4 {
+    min-height: calc(100vh - 100px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100vw;
+}
+
+.steps-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 80px;
+    max-width: 1200px;
+    width: 100%;
+}
+
+.step-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    max-width: 200px;
+}
+
+.step-circle {
+    background-color: #1e40af;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 20px rgba(30, 64, 175, 0.3);
+}
+
+.step-content h3 {
+    color: #1e40af;
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.step-content p {
+    color: #374151;
+    font-size: 16px;
+    line-height: 1.5;
 }

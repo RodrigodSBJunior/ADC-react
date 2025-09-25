@@ -54,6 +54,8 @@ body, html {
   width: 100%;
   max-width: 500px;
   text-align: center;
+  position: relative;
+  z-index: 10;
 }
 
 .login-card h1 {
@@ -75,22 +77,100 @@ body, html {
   gap: 20px;
 }
 
-.input-group input {
+.input-group input,
+.input-group select {
   width: 100%;
   padding: 20px;
   border: 2px solid #e5e7eb;
   border-radius: 12px;
   font-size: 18px;
   background: white;
+  color: #374151;
   transition: all 0.3s ease;
   box-sizing: border-box;
 }
 
-.input-group input:focus {
+.input-group input:focus,
+.input-group select:focus {
   outline: none;
   border-color: #1e40af;
   background: white;
   box-shadow: 0 4px 15px rgba(30, 64, 175, 0.2);
+}
+
+.input-group select {
+  cursor: pointer;
+}
+
+.user-type-selection {
+  margin-bottom: 30px;
+}
+
+.user-type-selection h3 {
+  color: #1e40af;
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.user-cards {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+
+.user-card {
+  background: white;
+  border: 3px solid #e5e7eb;
+  border-radius: 15px;
+  padding: 25px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex: 1;
+  max-width: 150px;
+  position: relative;
+  z-index: 20;
+  user-select: none;
+}
+
+.user-card:hover {
+  border-color: #1e40af;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(30, 64, 175, 0.2);
+}
+
+.user-card.selected {
+  border-color: #1e40af;
+  background: linear-gradient(135deg, #1e40af, #3b82f6);
+  color: white;
+  box-shadow: 0 10px 30px rgba(30, 64, 175, 0.3);
+}
+
+.user-card.selected h4 {
+  color: white;
+}
+
+.user-card.selected p {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.card-icon {
+  font-size: 40px;
+  margin-bottom: 10px;
+}
+
+.user-card h4 {
+  color: #1e40af;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.user-card p {
+  color: #6b7280;
+  font-size: 12px;
+  margin: 0;
 }
 
 .login-btn {
@@ -132,7 +212,7 @@ body, html {
 .forgot-password {
   color: #1e40af;
   text-decoration: none;
-  font-size: 12px;
+  font-size: 15px;
   margin-top: 12px;
   margin-bottom: 25px;
   display: block;
