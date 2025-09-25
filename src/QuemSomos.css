@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .sobre-container {
   min-height: 100vh;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -223,4 +224,54 @@
   .sobre-content {
     padding: 40px 20px;
   }
+=======
+.quem-somos {
+    padding: 2rem;
+    width: 100%;
+    font-family: Arial, sans-serif;
+}
+
+.quem-somos h1 {
+    text-align: center;
+    color: #333;
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+}
+
+.container {
+    background: #f9f9f9;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.container h2 {
+    color: #2c5aa0;
+    font-size: 1.5rem;
+    margin: 2rem 0 1rem 0;
+    border-bottom: 2px solid #2c5aa0;
+    padding-bottom: 0.5rem;
+}
+
+.container p {
+    color: #555;
+    line-height: 1.6;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    text-align: justify;
+}
+
+@media (max-width: 768px) {
+    .quem-somos {
+        padding: 1rem;
+    }
+    
+    .quem-somos h1 {
+        font-size: 2rem;
+    }
+    
+    .container {
+        padding: 1rem;
+    }
+>>>>>>> a7f9f88b49f5865d52a55eb20375de425810074f
 }
