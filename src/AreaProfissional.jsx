@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import './AreaProfissional.css'
+import { useNavigate } from 'react-router-dom'
 
 const AreaProfissional = () => {
   const [activeSection, setActiveSection] = useState('dashboard')
   const [notifications] = useState(3)
+  const navigate = useNavigate();
 
   const handleLogout = () => {
-    window.location.href = '/'
+    navigate('/')
   }
 
   const menuItems = [
@@ -124,6 +126,28 @@ const AreaProfissional = () => {
             </div>
           </div>
         )
+      case 'notificacoes':
+        return (
+          <div className="section-content">
+            <h2>🔔 Notificações</h2>
+            <div className="notifications-card">
+              <p>Suas notificações recentes</p>
+              <div className="notification-item">
+                <span>Nova consulta agendada - Maria Silva</span>
+              </div>
+            </div>
+          </div>
+        )
+      case 'perfil':
+        return (
+          <div className="section-content">
+            <h2>👤 Meu Perfil</h2>
+            <div className="profile-card">
+              <p>Informações do seu perfil</p>
+              <button className="secondary-btn">Editar Perfil</button>
+            </div>
+          </div>
+        )
       default:
         return <div>Seção não encontrada</div>
     }
@@ -150,13 +174,13 @@ const AreaProfissional = () => {
         </nav>
         
         <div className="sidebar-footer">
-          <button className="nav-item" onClick={() => alert('Notificações')}>
+          <button className="nav-item" onClick={() => setActiveSection('notificacoes')}>
             <span className="nav-icon">🔔</span>
             <span className="nav-label">Notificações</span>
             {notifications > 0 && <span className="notification-badge">{notifications}</span>}
           </button>
           
-          <button className="nav-item" onClick={() => alert('Meu Perfil')}>
+          <button className="nav-item" onClick={() => setActiveSection('perfil')}>
             <span className="nav-icon">👤</span>
             <span className="nav-label">Meu Perfil</span>
           </button>

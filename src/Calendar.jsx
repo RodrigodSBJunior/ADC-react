@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import './Calendar.css'
 
 const Calendar = ({ onDateSelect }) => {
@@ -17,9 +17,18 @@ const Calendar = ({ onDateSelect }) => {
     }
   }
 
-  const today = new Date()
-  const currentMonth = today.getMonth()
-  const currentYear = today.getFullYear()
+  const dateInfo = useMemo(() => {
+    const today = new Date()
+    return {
+      currentMonth: today.getMonth(),
+      currentYear: today.getFullYear()
+    }
+  }, [])
+
+  const monthNames = useMemo(() => [
+    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+  ], [])
 
   const getDaysInMonth = (month, year) => {
     return new Date(year, month + 1, 0).getDate()
@@ -30,8 +39,8 @@ const Calendar = ({ onDateSelect }) => {
   }
 
   const renderCalendar = () => {
-    const daysInMonth = getDaysInMonth(currentMonth, currentYear)
-    const firstDay = getFirstDayOfMonth(currentMonth, currentYear)
+    const daysInMonth = getDaysInMonth(dateInfo.currentMonth, dateInfo.currentYear)
+    const firstDay = getFirstDayOfMonth(dateInfo.currentMonth, dateInfo.currentYear)
     const days = []
 
     // Dias vazios no início
@@ -41,7 +50,7 @@ const Calendar = ({ onDateSelect }) => {
 
     // Dias do mês
     for (let day = 1; day <= daysInMonth; day++) {
-      const date = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+      const date = `${dateInfo.currentYear}-${String(dateInfo.currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
       days.push(
         <div 
           key={day} 
@@ -56,11 +65,6 @@ const Calendar = ({ onDateSelect }) => {
     return days
   }
 
-  const monthNames = [
-    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-  ]
-
   return (
     <div className="calendar-container">
       <div className="calendar-icon" onClick={toggleCalendar}>
@@ -70,7 +74,7 @@ const Calendar = ({ onDateSelect }) => {
       {showCalendar && (
         <div className="calendar-popup">
           <div className="calendar-header">
-            <h3>{monthNames[currentMonth]} {currentYear}</h3>
+            <h3>{monthNames[dateInfo.currentMonth]} {dateInfo.currentYear}</h3>
             <button className="close-btn" onClick={() => setShowCalendar(false)}>×</button>
           </div>
           

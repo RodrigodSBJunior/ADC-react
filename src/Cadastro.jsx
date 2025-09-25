@@ -1,6 +1,7 @@
 import './Cadastro.css'
 import Calendar from './Calendar'
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 const Cadastro = () => {
   const [birthDate, setBirthDate] = useState('')
@@ -12,18 +13,19 @@ const Cadastro = () => {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [passwordError, setPasswordError] = useState('')
   const [acceptTerms, setAcceptTerms] = useState(false)
+  const navigate = useNavigate();
 
   const handleBack = () => {
-    window.history.back();
+    navigate(-1);
   };
 
   const handleLogin = () => {
-    window.location.href = '/entrar';
+    navigate('/entrar');
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    window.location.href = '/areaprofissional';
+    navigate('/areaprofissional');
   };
 
   const validateAge = (date) => {
@@ -38,28 +40,27 @@ const Cadastro = () => {
     return age
   }
 
-  const handleDateChange = (e) => {
-    const date = e.target.value
-    setBirthDate(date)
-    
-    if (date) {
-      const age = validateAge(date)
-      if (age < 12) {
-        setAgeError('Você deve ter pelo menos 12 anos para se cadastrar')
-      } else {
-        setAgeError('')
-      }
-    }
-  }
-
-  const handleDateSelect = (date) => {
-    setBirthDate(date)
+  const validateAndSetAge = (date) => {
     const age = validateAge(date)
     if (age < 12) {
       setAgeError('Você deve ter pelo menos 12 anos para se cadastrar')
     } else {
       setAgeError('')
     }
+  }
+
+  const handleDateChange = (e) => {
+    const date = e.target.value
+    setBirthDate(date)
+    
+    if (date) {
+      validateAndSetAge(date)
+    }
+  }
+
+  const handleDateSelect = (date) => {
+    setBirthDate(date)
+    validateAndSetAge(date)
   }
 
   const validateEmail = (email) => {
@@ -158,7 +159,16 @@ const Cadastro = () => {
                   className={ageError ? 'error' : ''}
                   required 
                 />
-                <div className="calendar-icon-inside" onClick={() => document.querySelector('input[type="date"]').showPicker()}>
+                <div className="calendar-icon-inside" onClick={() => {
+                  try {
+                    const dateInput = document.querySelector('input[type="date"]');
+                    if (dateInput && dateInput.showPicker) {
+                      dateInput.showPicker();
+                    }
+                  } catch (error) {
+                    console.log('showPicker not supported');
+                  }
+                }}>
                   📅
                 </div>
               </div>

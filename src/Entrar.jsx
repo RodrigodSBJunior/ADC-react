@@ -1,21 +1,26 @@
 import { useState } from 'react'
 import './Entrar.css'
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Entrar = () => {
   const [userType, setUserType] = useState('');
+  const navigate = useNavigate();
   
   const handleBack = () => {
-    window.history.back();
+    navigate(-1);
   };
 
   const handleCreateAccount = () => {
-    window.location.href = '/cadastro';
+    navigate('/cadastro');
   };
 
   const handleLogin = (e) => {
     e.preventDefault();
-    window.location.href = '/areapaciente';
+    if (userType === 'profissional') {
+      navigate('/areaprofissional');
+    } else {
+      navigate('/areapaciente');
+    }
   };
 
   return (
@@ -58,11 +63,21 @@ const Entrar = () => {
           </div>
           <div className="input-group">
             <input type="password" placeholder="Senha" required />
-            <a href="#" className="forgot-password">
+            <button 
+              type="button" 
+              className="forgot-password"
+              onClick={() => alert('Funcionalidade em desenvolvimento')}
+            >
               Esqueci a senha
-            </a>
+            </button>
           </div>
-          <button type="submit" className="login-btn">Entrar</button>
+          <button 
+            type="submit" 
+            className="login-btn"
+            disabled={!userType}
+          >
+            Entrar
+          </button>
           <button
             type="button"
             className="create-account-btn"
