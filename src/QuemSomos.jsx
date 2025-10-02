@@ -1,5 +1,6 @@
 import './QuemSomos.css'
 import Menu from './Menu'
+import Footer from './pages/Footer'
 import psicologaImg from './assets/psicologa.png'
 import clinicaImg from './assets/clinica.png'
 import { useNavigate } from 'react-router-dom'
@@ -109,6 +110,7 @@ const QuemSomos = () => {
           </div>
         </div>
       </div>
+      <Footer />
     </>
   )
 }

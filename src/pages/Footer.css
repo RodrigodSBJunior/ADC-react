@@ -1,0 +1,25 @@
+.footer {
+    background-color: black;
+    color: white;
+    text-align: center;
+    padding: 30px 0;
+    width: 100%;
+}
+
+.footer-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+}
+
+.footer-info p {
+    margin: 5px 0;
+}
+
+@media (max-width: 768px) {
+    .footer-content {
+        flex-direction: column;
+        gap: 15px;
+    }
+}

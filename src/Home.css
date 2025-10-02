@@ -14,8 +14,8 @@ body {
     min-height: calc(100vh - 100px);
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    padding: 140px 60px 40px 60px;
+    align-items: flex-end;
+    padding: 40px 60px 40px 60px;
     background: linear-gradient(135deg, #f8fafc, #e2e8f0);
     margin-top: 100px;
     width: 100vw;

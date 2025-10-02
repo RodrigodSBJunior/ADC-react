@@ -3,6 +3,7 @@ import play from "./assets/play.jpeg";
 import blz from "./assets/blz.jpeg";
 import mao from "./assets/mao.jpeg";
 import Menu from "./Menu";
+import Footer from "./pages/Footer";
 import "./Home.css";
 
 const Home = () => {
@@ -19,26 +20,7 @@ const Home = () => {
         </Link>
       </div>
 
-      <div id="part3">
-        <div className="containers">
-          <img src={play} alt="Profissionais qualificados" />
-          <p>
-            Profissionais <span>qualificados</span>
-          </p>
-        </div>
-        <div className="containers">
-          <img src={blz} alt="Atendimento humanizado" />
-          <p>
-            Atendimento <span>humanizado</span>
-          </p>
-        </div>
-        <div className="containers">
-          <img src={mao} alt="Atendimento online e presencial" />
-          <p>
-            Atendimento online <span>e presencial</span>
-          </p>
-        </div>
-      </div>
+     
 
       <div id="part4">
         <h2>Como Funciona</h2>
@@ -73,6 +55,7 @@ const Home = () => {
           </div>
         </div>
       </div>
+      <Footer />
     </>
   );
 };
