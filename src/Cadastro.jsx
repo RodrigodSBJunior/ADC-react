@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 const Cadastro = () => {
+  const [userType, setUserType] = useState('')
   const [birthDate, setBirthDate] = useState('')
   const [ageError, setAgeError] = useState('')
   const [email, setEmail] = useState('')
@@ -25,7 +26,11 @@ const Cadastro = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    navigate('/areaprofissional');
+    if (userType === 'profissional') {
+      navigate('/areaprofissional');
+    } else {
+      navigate('/areapaciente');
+    }
   };
 
   const validateAge = (date) => {
@@ -120,9 +125,45 @@ const Cadastro = () => {
       <div className="cadastro-card">
         <h1>Criar Conta</h1>
         <p>Preencha os dados para se cadastrar</p>
+        
+        <div className="user-type-selection">
+          <h3>Selecione o tipo de usuário</h3>
+          <div className="user-cards">
+            <div
+              className={`user-card ${
+                userType === "paciente" ? "selected" : ""
+              }`}
+              onClick={() => setUserType("paciente")}
+            >
+              <div className="card-icon">👤</div>
+              <h4>Paciente</h4>
+              <p>Agendar consultas</p>
+            </div>
+            <div
+              className={`user-card ${
+                userType === "profissional" ? "selected" : ""
+              }`}
+              onClick={() => setUserType("profissional")}
+            >
+              <div className="card-icon">👨⚕️</div>
+              <h4>Profissional</h4>
+              <p>Gerenciar agenda</p>
+            </div>
+          </div>
+        </div>
+        
         <form className="cadastro-form" onSubmit={handleSubmit}>
           <div className="input-group">
             <input type="text" placeholder="Nome completo" required />
+          </div>
+          
+          <div className="input-row">
+            <div className="input-group">
+              <input type="text" placeholder="CPF" required />
+            </div>
+            <div className="input-group">
+              <input type="tel" placeholder="Telefone" required />
+            </div>
           </div>
           
           <div className="input-row">
@@ -221,7 +262,7 @@ const Cadastro = () => {
             </label>
           </div>
           
-          <button type="submit" className="cadastro-btn" disabled={!acceptTerms}>Criar Conta</button>
+          <button type="submit" className="cadastro-btn" disabled={!acceptTerms || !userType}>Criar Conta</button>
           <button type="button" className="login-link-btn" onClick={handleLogin}>Já tenho conta</button>
         </form>
       </div>

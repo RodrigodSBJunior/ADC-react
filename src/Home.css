@@ -16,7 +16,10 @@ body {
     justify-content: space-between;
     align-items: flex-end;
     padding: 40px 60px 40px 60px;
-    background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+    background: linear-gradient(135deg, rgba(248, 250, 252, 0.9), rgba(226, 232, 240, 0.9)), url('./assets/ChatGPT Image 4 de out. de 2025, 18_24_13.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     margin-top: 100px;
     width: 100vw;
 }

@@ -8,6 +8,8 @@ const AreaPaciente = () => {
   const [selectedTime, setSelectedTime] = useState(null)
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth())
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear())
+  const [isEditingName, setIsEditingName] = useState(false)
+  const [editedName, setEditedName] = useState('Maria Silva Santos')
   const [scheduledAppointments, setScheduledAppointments] = useState([
     { id: 1, doctor: 'Dr. João Silva', date: '15/01/2025', time: '14:00', status: 'Confirmado' },
     { id: 2, doctor: 'Dra. Maria Santos', date: '18/01/2025', time: '10:00', status: 'Confirmado' },
@@ -23,6 +25,13 @@ const AreaPaciente = () => {
     { id: 5, doctor: 'Dr. Paulo Lima', date: '15/11/2024', time: '15:30', status: 'Realizada', rating: 5 },
     { id: 6, doctor: 'Dra. Carla Mendes', date: '08/11/2024', time: '11:00', status: 'Faltou', rating: null },
     { id: 7, doctor: 'Dr. Eduardo Rocha', date: '02/11/2024', time: '13:30', status: 'Realizada', rating: 3 }
+  ])
+  const [notifications, setNotifications] = useState([
+    { id: 1, icon: '🔔', title: 'Nova consulta agendada', message: 'Sua consulta com Dr. João foi confirmada para 15/01 às 14:00', time: 'Há 2 horas', read: false },
+    { id: 2, icon: 'ℹ️', title: 'Lembrete de consulta', message: 'Sua consulta é amanhã às 10:00. Não esqueça!', time: 'Há 5 horas', read: false },
+    { id: 3, icon: '✅', title: 'Consulta realizada', message: 'Consulta com Dra. Maria foi concluída. Avalie o atendimento', time: 'Ontem', read: true },
+    { id: 4, icon: '📝', title: 'Relatório disponível', message: 'Seu relatório médico já está disponível para download', time: 'Há 1 dia', read: false },
+    { id: 5, icon: '💳', title: 'Pagamento processado', message: 'Pagamento da consulta de 10/01 foi processado com sucesso', time: 'Há 2 dias', read: false }
   ])
   const navigate = useNavigate();
 
@@ -113,10 +122,29 @@ const AreaPaciente = () => {
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard' },
     { id: 'agendar', label: 'Agendar Consulta' },
-    { id: 'consultas', label: 'Minhas Consultas' },
+    { id: 'consultas', label: 'Minhas Consultas', badge: 3 },
     { id: 'historico', label: 'Histórico' },
     { id: 'perfil', label: 'Meu Perfil' }
   ]
+
+  const unreadCount = notifications.filter(n => !n.read).length
+  const footerItems = [
+    { id: 'notificacoes', label: 'Notificações', badge: unreadCount > 0 ? unreadCount : null }
+  ]
+
+  const markAsRead = (id) => {
+    setNotifications(notifications.map(n => 
+      n.id === id ? { ...n, read: true } : n
+    ))
+  }
+
+  const markAllAsRead = () => {
+    setNotifications(notifications.map(n => ({ ...n, read: true })))
+  }
+
+  const clearNotifications = () => {
+    setNotifications([])
+  }
 
   const renderContent = () => {
     switch(activeSection) {
@@ -330,11 +358,7 @@ const AreaPaciente = () => {
                       <span className={`status ${appointment.status.toLowerCase()}`}>{appointment.status}</span>
                       <button 
                         className="cancel-btn" 
-                        onClick={() => {
-                          if (confirm('Tem certeza que deseja cancelar esta consulta?')) {
-                            setScheduledAppointments(scheduledAppointments.filter(app => app.id !== appointment.id))
-                          }
-                        }}
+                        onClick={() => navigate('/cancelar')}
                       >
                         Cancelar
                       </button>
@@ -372,13 +396,146 @@ const AreaPaciente = () => {
             </div>
           </div>
         )
+      case 'notificacoes':
+        return (
+          <div className="section-content">
+            <h2>Notificações</h2>
+            <div className="notifications-card">
+              {notifications.length > 0 ? (
+                <>
+                  <div className="notifications-list">
+                    {notifications.map(notification => (
+                      <div 
+                        key={notification.id} 
+                        className={`notification-item ${!notification.read ? 'unread' : ''}`}
+                        onClick={() => markAsRead(notification.id)}
+                      >
+                        <div className="notification-icon">{notification.icon}</div>
+                        <div className="notification-content">
+                          <h4>{notification.title}</h4>
+                          <p>{notification.message}</p>
+                          <span className="notification-time">{notification.time}</span>
+                        </div>
+                        {!notification.read && <div className="unread-dot"></div>}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="notification-actions">
+                    <button 
+                      className="primary-btn" 
+                      onClick={markAllAsRead}
+                      disabled={unreadCount === 0}
+                    >
+                      Marcar todas como lidas
+                    </button>
+                    <button 
+                      className="secondary-btn" 
+                      onClick={() => {
+                        if (confirm('Tem certeza que deseja limpar todas as notificações?')) {
+                          clearNotifications()
+                        }
+                      }}
+                    >
+                      Limpar notificações
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div className="empty-notifications">
+                  <div className="empty-icon">🔔</div>
+                  <h3>Nenhuma notificação</h3>
+                  <p>Você não tem notificações no momento.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )
       case 'perfil':
         return (
           <div className="section-content">
             <h2>Meu Perfil</h2>
             <div className="profile-card">
-              <p>Suas informações pessoais</p>
-              <button className="secondary-btn">Editar Perfil</button>
+              <div className="profile-header">
+                <div className="profile-avatar">
+                  <div className="avatar-circle">👤</div>
+                  <button className="change-photo-btn">Alterar Foto</button>
+                </div>
+                <div className="profile-info">
+                  <h3>Maria Silva</h3>
+                  <p className="profile-type">Paciente</p>
+                  <p className="member-since">Membro desde: Janeiro 2024</p>
+                </div>
+              </div>
+              
+              <div className="profile-details">
+                <div className="detail-section">
+                  <h4>Informações Pessoais</h4>
+                  <div className="detail-grid">
+                    <div className="detail-item">
+                      <label>Nome Completo</label>
+                      {isEditingName ? (
+                        <div className="edit-field">
+                          <input 
+                            type="text" 
+                            value={editedName}
+                            onChange={(e) => setEditedName(e.target.value)}
+                            className="edit-input"
+                          />
+                          <div className="edit-actions">
+                            <button 
+                              className="save-btn"
+                              onClick={() => setIsEditingName(false)}
+                            >
+                              ✓
+                            </button>
+                            <button 
+                              className="cancel-btn"
+                              onClick={() => {
+                                setEditedName('Maria Silva Santos')
+                                setIsEditingName(false)
+                              }}
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="view-field">
+                          <span>{editedName}</span>
+                          <button 
+                            className="edit-btn"
+                            onClick={() => setIsEditingName(true)}
+                          >
+                            ✏️
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                    <div className="detail-item">
+                      <label>Email</label>
+                      <span>maria.silva@email.com</span>
+                    </div>
+                    <div className="detail-item">
+                      <label>CPF</label>
+                      <span>123.456.789-00</span>
+                    </div>
+                    <div className="detail-item">
+                      <label>Telefone</label>
+                      <span>(11) 99999-9999</span>
+                    </div>
+                    <div className="detail-item">
+                      <label>Data de Nascimento</label>
+                      <span>15/03/1990</span>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+              
+              <div className="profile-actions">
+                <button className="primary-btn">Editar Perfil</button>
+                <button className="secondary-btn">Alterar Senha</button>
+              </div>
             </div>
           </div>
         )
@@ -402,11 +559,22 @@ const AreaPaciente = () => {
               onClick={() => setActiveSection(item.id)}
             >
               <span className="nav-label">{item.label}</span>
+              {item.badge && <span className="notification-badge">{item.badge}</span>}
             </button>
           ))}
         </nav>
         
         <div className="sidebar-footer">
+          {footerItems.map(item => (
+            <button
+              key={item.id}
+              className={`nav-item ${activeSection === item.id ? 'active' : ''}`}
+              onClick={() => setActiveSection(item.id)}
+            >
+              <span className="nav-label">{item.label}</span>
+              {item.badge && <span className="notification-badge">{item.badge}</span>}
+            </button>
+          ))}
           <button className="nav-item logout" onClick={handleLogout}>
             <span className="nav-label">Sair</span>
           </button>

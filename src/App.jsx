@@ -9,6 +9,7 @@ import Formularios from './Formularios';
 import Agendar from './Agendar';
 import AreaProfissional from './AreaProfissional';
 import AreaPaciente from './AreaPaciente';
+import Cancelar from './Cancelar';
 
 function App() {
   return(
@@ -24,6 +25,7 @@ function App() {
         <Route path="/agendar" element={<Agendar />} />
         <Route path="/areaprofissional" element={<AreaProfissional />} />
         <Route path="/areapaciente" element={<AreaPaciente />} />
+        <Route path="/cancelar" element={<Cancelar />} />
         <Route path="*" element={<div><h1>404 - Página não encontrada</h1></div>} />
       </Routes>
     </Router>

@@ -1,6 +1,6 @@
 import './Contato.css';
-import Menu from './pages/Menu';
-import Footer from './pages/Footer';
+import Menu from './Menu';
+import Footer from './pages/menu/Footer';
 
 const Contato = () => {
   return (
