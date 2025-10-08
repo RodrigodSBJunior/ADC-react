@@ -25,6 +25,20 @@ html, body {
   width: 100%;
 }
 
+.sidebar-fixed {
+  width: 280px;
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  height: 100vh;
+  left: 0;
+  top: 0;
+  z-index: 1000;
+}
+
 .sidebar {
   width: 350px;
   background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
@@ -35,19 +49,22 @@ html, body {
 }
 
 .sidebar-header {
-  padding: 40px 30px;
+  padding: 25px 20px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  text-align: center;
 }
 
 .sidebar-header h2 {
   margin: 0;
-  font-size: 2.2rem;
+  font-size: 1.8rem;
   font-weight: 700;
+  letter-spacing: 2px;
 }
 
 .sidebar-nav {
   flex: 1;
-  padding: 30px 0;
+  padding: 20px 0;
+  overflow-y: auto;
 }
 
 .nav-item {
@@ -55,13 +72,14 @@ html, body {
   background: none;
   border: none;
   color: white;
-  padding: 20px 30px;
+  padding: 15px 20px;
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
   position: relative;
+  text-align: left;
 }
 
 .nav-item:hover {
@@ -74,14 +92,16 @@ html, body {
 }
 
 .nav-icon {
-  font-size: 1.6rem;
-  width: 32px;
+  font-size: 1.2rem;
+  width: 24px;
   text-align: center;
+  flex-shrink: 0;
 }
 
 .nav-label {
-  font-size: 1.4rem;
-  font-weight: 600;
+  font-size: 0.9rem;
+  font-weight: 500;
+  flex: 1;
 }
 
 .notification-badge {
@@ -174,7 +194,7 @@ html, body {
 
 .sidebar-footer {
   border-top: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 30px 0;
+  padding: 15px 0;
 }
 
 .nav-item.logout:hover {
@@ -185,6 +205,7 @@ html, body {
   flex: 1;
   display: flex;
   flex-direction: column;
+  margin-left: 280px;
 }
 
 .top-header {

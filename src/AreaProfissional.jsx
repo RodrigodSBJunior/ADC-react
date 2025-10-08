@@ -145,14 +145,20 @@ const AreaProfissional = () => {
   }
 
   const menuItems = [
-    { id: 'dashboard', label: 'Dashboard' },
-    { id: 'criar-agenda', label: 'Criar Agenda' },
-    { id: 'visualizar-agenda', label: 'Visualizar Agenda' },
-    { id: 'consultas-passadas', label: 'Consultas Passadas' },
-    { id: 'cancelar-consultas', label: 'Cancelar Consultas' },
-    { id: 'consultas-canceladas', label: 'Consultas Canceladas' },
-    { id: 'pacientes', label: 'Ver Pacientes' },
-    { id: 'locais', label: 'Locais' }
+    { id: 'dashboard', label: 'Dashboard', icon: '📊' },
+    { id: 'criar-agenda', label: 'Criar Agenda', icon: '📅' },
+    { id: 'visualizar-agenda', label: 'Visualizar Agenda', icon: '👁️' },
+    { id: 'consultas-passadas', label: 'Consultas Passadas', icon: '📋' },
+    { id: 'cancelar-consultas', label: 'Cancelar Consultas', icon: '❌' },
+    { id: 'consultas-canceladas', label: 'Consultas Canceladas', icon: '🚫' },
+    { id: 'pacientes', label: 'Gerenciar Pacientes', icon: '👥' },
+    { id: 'prontuarios', label: 'Prontuários', icon: '📝' },
+    { id: 'financeiro', label: 'Financeiro', icon: '💰' },
+    { id: 'relatorios', label: 'Relatórios', icon: '📈' },
+    { id: 'configuracoes', label: 'Configurações', icon: '⚙️' },
+    { id: 'locais', label: 'Locais de Atendimento', icon: '🏥' },
+    { id: 'agenda-bloqueios', label: 'Bloqueios de Agenda', icon: '🔒' },
+    { id: 'lembretes', label: 'Lembretes', icon: '⏰' }
   ]
 
   const renderContent = () => {
@@ -936,18 +942,395 @@ const AreaProfissional = () => {
       case 'pacientes':
         return (
           <div className="section-content">
-            <h2>👥 Ver Pacientes</h2>
-            <div className="patients-card">
-              <p>Lista de todos os seus pacientes</p>
-              <div className="patients-list">
-                <div className="patient-item">
-                  <div className="patient-avatar">👤</div>
-                  <span>Maria Silva</span>
+            <h2>👥 Gerenciar Pacientes</h2>
+            <div style={{ background: 'white', padding: '20px', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                <h3 style={{ color: '#1e293b', margin: 0 }}>Lista de Pacientes</h3>
+                <button style={{
+                  background: '#3b82f6',
+                  color: 'white',
+                  border: 'none',
+                  padding: '10px 20px',
+                  borderRadius: '8px',
+                  cursor: 'pointer'
+                }}>
+                  + Novo Paciente
+                </button>
+              </div>
+              
+              <div style={{ display: 'grid', gap: '15px' }}>
+                {[
+                  { nome: 'Maria Silva', idade: 28, telefone: '(11) 99999-1111', ultimaConsulta: '2025-01-10', status: 'Ativo' },
+                  { nome: 'João Santos', idade: 35, telefone: '(11) 99999-2222', ultimaConsulta: '2025-01-08', status: 'Ativo' },
+                  { nome: 'Ana Costa', idade: 42, telefone: '(11) 99999-3333', ultimaConsulta: '2024-12-20', status: 'Inativo' },
+                  { nome: 'Carlos Lima', idade: 31, telefone: '(11) 99999-4444', ultimaConsulta: '2025-01-05', status: 'Ativo' }
+                ].map((paciente, index) => (
+                  <div key={index} style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '15px',
+                    background: '#f8fafc',
+                    borderRadius: '8px',
+                    borderLeft: `4px solid ${paciente.status === 'Ativo' ? '#10b981' : '#f59e0b'}`
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                      <div style={{
+                        width: '50px',
+                        height: '50px',
+                        borderRadius: '50%',
+                        background: '#e0f2fe',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '20px'
+                      }}>👤</div>
+                      <div>
+                        <div style={{ fontWeight: '600', fontSize: '16px' }}>{paciente.nome}</div>
+                        <div style={{ fontSize: '14px', color: '#64748b' }}>{paciente.idade} anos • {paciente.telefone}</div>
+                        <div style={{ fontSize: '12px', color: '#9ca3af' }}>Última consulta: {new Date(paciente.ultimaConsulta).toLocaleDateString('pt-BR')}</div>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span style={{
+                        padding: '4px 8px',
+                        borderRadius: '12px',
+                        fontSize: '12px',
+                        background: paciente.status === 'Ativo' ? '#d1fae5' : '#fef3c7',
+                        color: paciente.status === 'Ativo' ? '#065f46' : '#92400e'
+                      }}>
+                        {paciente.status}
+                      </span>
+                      <button style={{
+                        background: '#3b82f6',
+                        color: 'white',
+                        border: 'none',
+                        padding: '6px 12px',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontSize: '12px'
+                      }}>
+                        Ver Detalhes
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )
+      case 'prontuarios':
+        return (
+          <div className="section-content">
+            <h2>📝 Prontuários</h2>
+            <div style={{ background: 'white', padding: '20px', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
+              <h3 style={{ color: '#1e293b', marginBottom: '20px' }}>Prontuários dos Pacientes</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
+                {[
+                  { paciente: 'Maria Silva', sessoes: 12, ultimaAtualizacao: '2025-01-10' },
+                  { paciente: 'João Santos', sessoes: 8, ultimaAtualizacao: '2025-01-08' },
+                  { paciente: 'Carlos Lima', sessoes: 15, ultimaAtualizacao: '2025-01-05' }
+                ].map((prontuario, index) => (
+                  <div key={index} style={{
+                    padding: '20px',
+                    background: '#f0f9ff',
+                    borderRadius: '12px',
+                    border: '1px solid #e0f2fe'
+                  }}>
+                    <h4 style={{ margin: '0 0 10px 0', color: '#1e40af' }}>{prontuario.paciente}</h4>
+                    <p style={{ margin: '5px 0', fontSize: '14px', color: '#64748b' }}>{prontuario.sessoes} sessões registradas</p>
+                    <p style={{ margin: '5px 0', fontSize: '12px', color: '#9ca3af' }}>Última atualização: {new Date(prontuario.ultimaAtualizacao).toLocaleDateString('pt-BR')}</p>
+                    <div style={{ marginTop: '15px', display: 'flex', gap: '10px' }}>
+                      <button style={{
+                        background: '#3b82f6',
+                        color: 'white',
+                        border: 'none',
+                        padding: '8px 16px',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontSize: '12px'
+                      }}>
+                        Visualizar
+                      </button>
+                      <button style={{
+                        background: '#10b981',
+                        color: 'white',
+                        border: 'none',
+                        padding: '8px 16px',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontSize: '12px'
+                      }}>
+                        Editar
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )
+      case 'financeiro':
+        return (
+          <div className="section-content">
+            <h2>💰 Financeiro</h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '30px' }}>
+              <div style={{ background: '#10b981', color: 'white', padding: '20px', borderRadius: '12px' }}>
+                <div style={{ fontSize: '28px', fontWeight: 'bold' }}>R$ 4.850,00</div>
+                <div style={{ fontSize: '14px', opacity: 0.9 }}>Receita do Mês</div>
+              </div>
+              <div style={{ background: '#f59e0b', color: 'white', padding: '20px', borderRadius: '12px' }}>
+                <div style={{ fontSize: '28px', fontWeight: 'bold' }}>R$ 1.200,00</div>
+                <div style={{ fontSize: '14px', opacity: 0.9 }}>Pendente</div>
+              </div>
+              <div style={{ background: '#3b82f6', color: 'white', padding: '20px', borderRadius: '12px' }}>
+                <div style={{ fontSize: '28px', fontWeight: 'bold' }}>R$ 3.650,00</div>
+                <div style={{ fontSize: '14px', opacity: 0.9 }}>Recebido</div>
+              </div>
+            </div>
+            
+            <div style={{ background: 'white', padding: '20px', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
+              <h3 style={{ color: '#1e293b', marginBottom: '20px' }}>Últimas Transações</h3>
+              <div style={{ display: 'grid', gap: '10px' }}>
+                {[
+                  { paciente: 'Maria Silva', valor: 'R$ 150,00', data: '2025-01-10', status: 'Pago' },
+                  { paciente: 'João Santos', valor: 'R$ 150,00', data: '2025-01-08', status: 'Pago' },
+                  { paciente: 'Ana Costa', valor: 'R$ 150,00', data: '2025-01-05', status: 'Pendente' },
+                  { paciente: 'Carlos Lima', valor: 'R$ 150,00', data: '2025-01-03', status: 'Pago' }
+                ].map((transacao, index) => (
+                  <div key={index} style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '12px',
+                    background: '#f8fafc',
+                    borderRadius: '8px'
+                  }}>
+                    <div>
+                      <div style={{ fontWeight: '600' }}>{transacao.paciente}</div>
+                      <div style={{ fontSize: '14px', color: '#64748b' }}>{new Date(transacao.data).toLocaleDateString('pt-BR')}</div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontWeight: '600' }}>{transacao.valor}</div>
+                      <span style={{
+                        padding: '2px 8px',
+                        borderRadius: '12px',
+                        fontSize: '12px',
+                        background: transacao.status === 'Pago' ? '#d1fae5' : '#fef3c7',
+                        color: transacao.status === 'Pago' ? '#065f46' : '#92400e'
+                      }}>
+                        {transacao.status}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )
+      case 'relatorios':
+        return (
+          <div className="section-content">
+            <h2>📈 Relatórios</h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px' }}>
+              {[
+                { titulo: 'Relatório Mensal', descricao: 'Consultas e receitas do mês', icon: '📊' },
+                { titulo: 'Relatório de Pacientes', descricao: 'Lista completa de pacientes', icon: '👥' },
+                { titulo: 'Relatório Financeiro', descricao: 'Análise financeira detalhada', icon: '💰' },
+                { titulo: 'Relatório de Faltas', descricao: 'Pacientes que faltaram', icon: '❌' }
+              ].map((relatorio, index) => (
+                <div key={index} style={{
+                  background: 'white',
+                  padding: '20px',
+                  borderRadius: '12px',
+                  boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+                  textAlign: 'center'
+                }}>
+                  <div style={{ fontSize: '40px', marginBottom: '15px' }}>{relatorio.icon}</div>
+                  <h4 style={{ margin: '0 0 10px 0', color: '#1e293b' }}>{relatorio.titulo}</h4>
+                  <p style={{ margin: '0 0 20px 0', fontSize: '14px', color: '#64748b' }}>{relatorio.descricao}</p>
+                  <button style={{
+                    background: '#3b82f6',
+                    color: 'white',
+                    border: 'none',
+                    padding: '10px 20px',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    width: '100%'
+                  }}>
+                    Gerar Relatório
+                  </button>
                 </div>
-                <div className="patient-item">
-                  <div className="patient-avatar">👤</div>
-                  <span>João Santos</span>
+              ))}
+            </div>
+          </div>
+        )
+      case 'configuracoes':
+        return (
+          <div className="section-content">
+            <h2>⚙️ Configurações</h2>
+            <div style={{ display: 'grid', gap: '20px' }}>
+              <div style={{ background: 'white', padding: '20px', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
+                <h3 style={{ color: '#1e293b', marginBottom: '20px' }}>Configurações Gerais</h3>
+                <div style={{ display: 'grid', gap: '15px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span>Notificações por email</span>
+                    <input type="checkbox" defaultChecked />
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span>Lembrete de consultas</span>
+                    <input type="checkbox" defaultChecked />
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span>Backup automático</span>
+                    <input type="checkbox" defaultChecked />
+                  </div>
                 </div>
+              </div>
+              
+              <div style={{ background: 'white', padding: '20px', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
+                <h3 style={{ color: '#1e293b', marginBottom: '20px' }}>Configurações de Agenda</h3>
+                <div style={{ display: 'grid', gap: '15px' }}>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '5px' }}>Duração padrão da consulta</label>
+                    <select style={{ padding: '8px', borderRadius: '6px', border: '1px solid #d1d5db' }}>
+                      <option>50 minutos</option>
+                      <option>60 minutos</option>
+                      <option>90 minutos</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '5px' }}>Intervalo entre consultas</label>
+                    <select style={{ padding: '8px', borderRadius: '6px', border: '1px solid #d1d5db' }}>
+                      <option>10 minutos</option>
+                      <option>15 minutos</option>
+                      <option>30 minutos</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+      case 'agenda-bloqueios':
+        return (
+          <div className="section-content">
+            <h2>🔒 Bloqueios de Agenda</h2>
+            <div style={{ background: 'white', padding: '20px', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                <h3 style={{ color: '#1e293b', margin: 0 }}>Períodos Bloqueados</h3>
+                <button style={{
+                  background: '#ef4444',
+                  color: 'white',
+                  border: 'none',
+                  padding: '10px 20px',
+                  borderRadius: '8px',
+                  cursor: 'pointer'
+                }}>
+                  + Novo Bloqueio
+                </button>
+              </div>
+              
+              <div style={{ display: 'grid', gap: '15px' }}>
+                {[
+                  { periodo: 'Férias de Janeiro', inicio: '2025-01-20', fim: '2025-01-30', motivo: 'Férias programadas' },
+                  { periodo: 'Congresso de Psicologia', inicio: '2025-02-15', fim: '2025-02-17', motivo: 'Participação em evento' },
+                  { periodo: 'Feriado Carnaval', inicio: '2025-02-28', fim: '2025-03-04', motivo: 'Feriado nacional' }
+                ].map((bloqueio, index) => (
+                  <div key={index} style={{
+                    padding: '15px',
+                    background: '#fef2f2',
+                    borderRadius: '8px',
+                    borderLeft: '4px solid #ef4444'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div>
+                        <div style={{ fontWeight: '600', fontSize: '16px' }}>{bloqueio.periodo}</div>
+                        <div style={{ fontSize: '14px', color: '#64748b' }}>
+                          {new Date(bloqueio.inicio).toLocaleDateString('pt-BR')} até {new Date(bloqueio.fim).toLocaleDateString('pt-BR')}
+                        </div>
+                        <div style={{ fontSize: '12px', color: '#9ca3af' }}>{bloqueio.motivo}</div>
+                      </div>
+                      <button style={{
+                        background: '#ef4444',
+                        color: 'white',
+                        border: 'none',
+                        padding: '6px 12px',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontSize: '12px'
+                      }}>
+                        Remover
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )
+      case 'lembretes':
+        return (
+          <div className="section-content">
+            <h2>⏰ Lembretes</h2>
+            <div style={{ background: 'white', padding: '20px', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                <h3 style={{ color: '#1e293b', margin: 0 }}>Lembretes Ativos</h3>
+                <button style={{
+                  background: '#3b82f6',
+                  color: 'white',
+                  border: 'none',
+                  padding: '10px 20px',
+                  borderRadius: '8px',
+                  cursor: 'pointer'
+                }}>
+                  + Novo Lembrete
+                </button>
+              </div>
+              
+              <div style={{ display: 'grid', gap: '15px' }}>
+                {[
+                  { titulo: 'Renovar CRP', data: '2025-03-15', prioridade: 'Alta', descricao: 'Renovação do registro profissional' },
+                  { titulo: 'Reunião de equipe', data: '2025-01-25', prioridade: 'Média', descricao: 'Reunião mensal da equipe clínica' },
+                  { titulo: 'Atualizar prontuários', data: '2025-01-20', prioridade: 'Baixa', descricao: 'Revisar e atualizar prontuários pendentes' }
+                ].map((lembrete, index) => (
+                  <div key={index} style={{
+                    padding: '15px',
+                    background: '#f0f9ff',
+                    borderRadius: '8px',
+                    borderLeft: `4px solid ${lembrete.prioridade === 'Alta' ? '#ef4444' : lembrete.prioridade === 'Média' ? '#f59e0b' : '#10b981'}`
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div>
+                        <div style={{ fontWeight: '600', fontSize: '16px' }}>{lembrete.titulo}</div>
+                        <div style={{ fontSize: '14px', color: '#64748b' }}>{lembrete.descricao}</div>
+                        <div style={{ fontSize: '12px', color: '#9ca3af' }}>Data: {new Date(lembrete.data).toLocaleDateString('pt-BR')}</div>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span style={{
+                          padding: '4px 8px',
+                          borderRadius: '12px',
+                          fontSize: '12px',
+                          background: lembrete.prioridade === 'Alta' ? '#fee2e2' : lembrete.prioridade === 'Média' ? '#fef3c7' : '#d1fae5',
+                          color: lembrete.prioridade === 'Alta' ? '#991b1b' : lembrete.prioridade === 'Média' ? '#92400e' : '#065f46'
+                        }}>
+                          {lembrete.prioridade}
+                        </span>
+                        <button style={{
+                          background: '#10b981',
+                          color: 'white',
+                          border: 'none',
+                          padding: '6px 12px',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          fontSize: '12px'
+                        }}>
+                          Concluir
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -1488,6 +1871,7 @@ const AreaProfissional = () => {
               className={`nav-item ${activeSection === item.id ? 'active' : ''}`}
               onClick={() => setActiveSection(item.id)}
             >
+              <span className="nav-icon">{item.icon}</span>
               <span className="nav-label">{item.label}</span>
             </button>
           ))}
