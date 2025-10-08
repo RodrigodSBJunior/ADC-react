@@ -174,6 +174,7 @@ const AreaPaciente = () => {
                 <div className="stat-info">
                   <div className="stat-number">8.5</div>
                   <div className="stat-label">Avaliação Média</div>
+                  <p>Oliveira</p>
                 </div>
               </div>
             </div>
