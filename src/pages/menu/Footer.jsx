@@ -1,4 +1,4 @@
-import logo from "../../assets/logo.jpeg";
+import logo from "../../assets/ChatGPT Image 8 de out. de 2025, 09_06_54.png";
 import '../Footer.css';
 
 const Footer = () => {

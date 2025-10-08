@@ -2,7 +2,7 @@ import './QuemSomos.css'
 import Menu from './Menu'
 import Footer from './pages/menu/Footer'
 import psicologaImg from './assets/psicologa.png'
-import logo from './assets/logo.jpeg'
+import logo from './assets/ChatGPT Image 8 de out. de 2025, 09_06_54.png'
 
 const QuemSomos = () => {
   return (

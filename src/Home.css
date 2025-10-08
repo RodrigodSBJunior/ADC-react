@@ -13,30 +13,24 @@ body {
 #part2 {
     min-height: calc(100vh - 100px);
     display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    padding: 40px 60px 40px 60px;
-    background: linear-gradient(135deg, rgba(248, 250, 252, 0.9), rgba(226, 232, 240, 0.9)), url('./assets/ChatGPT Image 4 de out. de 2025, 18_24_13.png');
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 60px;
+    background: linear-gradient(135deg, rgba(30, 58, 138, 0.9), rgba(59, 130, 246, 0.9)), url('./assets/ChatGPT Image 4 de out. de 2025, 18_24_13.png');
     background-size: cover;
-    background-position: center;
+    background-position: center bottom;
     background-repeat: no-repeat;
     margin-top: 100px;
     width: 100vw;
 }
 
 #textprinc {
-    text-align: left;
-    flex: 1;
-    /* ocupa todo espaço disponível */
-    max-width: none;
-    /* remover o limite de 50% */
-    padding-left: 0;
-    /* tirar padding extra se quiser mais colado */
+    text-align: center;
+    margin-bottom: 30px;
 }
 
 .btn-contrate {
-    flex-shrink: 0;
-    /* impede que o botão diminua */
     background: linear-gradient(135deg, #1e3a8a, #3b82f6);
     color: white;
     border: none;
