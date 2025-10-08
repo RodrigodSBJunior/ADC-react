@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './AreaPaciente.css'
+import SidebarPaciente from './SidebarPaciente'
 
 const AreaPaciente = () => {
   const [activeSection, setActiveSection] = useState('dashboard')
@@ -10,6 +11,10 @@ const AreaPaciente = () => {
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear())
   const [isEditingName, setIsEditingName] = useState(false)
   const [editedName, setEditedName] = useState('Maria Silva Santos')
+  const [isEditingEmail, setIsEditingEmail] = useState(false)
+  const [editedEmail, setEditedEmail] = useState('maria.silva@email.com')
+  const [isEditingPhone, setIsEditingPhone] = useState(false)
+  const [editedPhone, setEditedPhone] = useState('(11) 99999-9999')
   const [scheduledAppointments, setScheduledAppointments] = useState([
     { id: 1, doctor: 'Dr. João Silva', date: '15/01/2025', time: '14:00', status: 'Confirmado' },
     { id: 2, doctor: 'Dra. Maria Santos', date: '18/01/2025', time: '10:00', status: 'Confirmado' },
@@ -115,22 +120,9 @@ const AreaPaciente = () => {
 
 
 
-  const handleLogout = () => {
-    navigate('/')
-  }
 
-  const menuItems = [
-    { id: 'dashboard', label: 'Dashboard' },
-    { id: 'agendar', label: 'Agendar Consulta' },
-    { id: 'consultas', label: 'Minhas Consultas', badge: 3 },
-    { id: 'historico', label: 'Histórico' },
-    { id: 'perfil', label: 'Meu Perfil' }
-  ]
 
   const unreadCount = notifications.filter(n => !n.read).length
-  const footerItems = [
-    { id: 'notificacoes', label: 'Notificações', badge: unreadCount > 0 ? unreadCount : null }
-  ]
 
   const markAsRead = (id) => {
     setNotifications(notifications.map(n => 
@@ -150,106 +142,112 @@ const AreaPaciente = () => {
     switch(activeSection) {
       case 'dashboard':
         return (
-          <div className="modern-dashboard">
-            <div className="stats-grid">
-              <div className="stat-card blue">
-                <div className="stat-info">
+          <div className="dashboard-wrapper">
+            <div className="dashboard-header">
+              <h2>Visão Geral</h2>
+            </div>
+            
+            <div className="dashboard-stats">
+              <div className="stat-card-new blue">
+                <div className="stat-content">
                   <div className="stat-number">12</div>
                   <div className="stat-label">Consultas Este Mês</div>
                 </div>
               </div>
-              <div className="stat-card green">
-                <div className="stat-info">
+              
+              <div className="stat-card-new green">
+                <div className="stat-content">
                   <div className="stat-number">3</div>
                   <div className="stat-label">Próximas Consultas</div>
                 </div>
               </div>
-              <div className="stat-card purple">
-                <div className="stat-info">
+              
+              <div className="stat-card-new purple">
+                <div className="stat-content">
                   <div className="stat-number">95%</div>
                   <div className="stat-label">Taxa de Comparecimento</div>
                 </div>
               </div>
-              <div className="stat-card orange">
-                <div className="stat-info">
-                  <div className="stat-number">8.5</div>
+              
+              <div className="stat-card-new orange">
+                <div className="stat-content">
+                  <div className="stat-number">4.8</div>
                   <div className="stat-label">Avaliação Média</div>
-                  <p>Oliveira</p>
                 </div>
               </div>
             </div>
-
-            <div className="chart-container">
-              <div className="chart-card">
-                <h3>Presenças vs Faltas</h3>
-                <div className="wave-chart">
-                  <div className="month-row">
-                    <div className="month-label">Jan</div>
-                    <div className="wave-container">
-                      <div className="wave-bar present" style={{width: '80%'}} data-tooltip="8 presenças">
-                        <div className="wave-fill"></div>
-                        <span className="wave-value">8</span>
-                      </div>
-                      <div className="wave-bar absent" style={{width: '20%'}} data-tooltip="2 faltas">
-                        <div className="wave-fill"></div>
-                        <span className="wave-value">2</span>
-                      </div>
+            
+            <div className="dashboard-content">
+              <div className="dashboard-card">
+                <h3>Próximas Consultas</h3>
+                <div className="upcoming-appointments">
+                  <div className="appointment-item">
+                    <div className="appointment-date">
+                      <span className="day">15</span>
+                      <span className="month">Jan</span>
                     </div>
+                    <div className="appointment-info">
+                      <h4>Dr. João Silva</h4>
+                      <p>14:00 - Consulta de Rotina</p>
+                    </div>
+                    <div className="appointment-status confirmed">Confirmado</div>
                   </div>
-                  <div className="month-row">
-                    <div className="month-label">Fev</div>
-                    <div className="wave-container">
-                      <div className="wave-bar present" style={{width: '90%'}} data-tooltip="9 presenças">
-                        <div className="wave-fill"></div>
-                        <span className="wave-value">9</span>
-                      </div>
-                      <div className="wave-bar absent" style={{width: '10%'}} data-tooltip="1 falta">
-                        <div className="wave-fill"></div>
-                        <span className="wave-value">1</span>
-                      </div>
+                  
+                  <div className="appointment-item">
+                    <div className="appointment-date">
+                      <span className="day">18</span>
+                      <span className="month">Jan</span>
                     </div>
+                    <div className="appointment-info">
+                      <h4>Dra. Maria Santos</h4>
+                      <p>10:00 - Acompanhamento</p>
+                    </div>
+                    <div className="appointment-status confirmed">Confirmado</div>
                   </div>
-                  <div className="month-row">
-                    <div className="month-label">Mar</div>
-                    <div className="wave-container">
-                      <div className="wave-bar present" style={{width: '70%'}} data-tooltip="7 presenças">
-                        <div className="wave-fill"></div>
-                        <span className="wave-value">7</span>
-                      </div>
-                      <div className="wave-bar absent" style={{width: '30%'}} data-tooltip="3 faltas">
-                        <div className="wave-fill"></div>
-                        <span className="wave-value">3</span>
-                      </div>
+                  
+                  <div className="appointment-item">
+                    <div className="appointment-date">
+                      <span className="day">22</span>
+                      <span className="month">Jan</span>
                     </div>
-                  </div>
-                  <div className="month-row">
-                    <div className="month-label">Abr</div>
-                    <div className="wave-container">
-                      <div className="wave-bar present" style={{width: '100%'}} data-tooltip="10 presenças">
-                        <div className="wave-fill"></div>
-                        <span className="wave-value">10</span>
-                      </div>
-                      <div className="wave-bar absent" style={{width: '0%'}} data-tooltip="0 faltas">
-                        <div className="wave-fill"></div>
-                        <span className="wave-value">0</span>
-                      </div>
+                    <div className="appointment-info">
+                      <h4>Dr. Pedro Costa</h4>
+                      <p>16:30 - Consulta Especializada</p>
                     </div>
+                    <div className="appointment-status pending">Pendente</div>
                   </div>
                 </div>
-                <div className="chart-legend">
-                  <div className="legend-item">
-                    <div className="legend-dot present"></div>
-                    <span>Presenças</span>
+              </div>
+              
+              <div className="dashboard-card">
+                <h3>Resumo Mensal</h3>
+                <div className="monthly-summary">
+                  <div className="summary-item">
+                    <div className="summary-icon green">✓</div>
+                    <div className="summary-text">
+                      <span className="summary-number">8</span>
+                      <span className="summary-label">Consultas Realizadas</span>
+                    </div>
                   </div>
-                  <div className="legend-item">
-                    <div className="legend-dot absent"></div>
-                    <span>Faltas</span>
+                  
+                  <div className="summary-item">
+                    <div className="summary-icon red">✗</div>
+                    <div className="summary-text">
+                      <span className="summary-number">1</span>
+                      <span className="summary-label">Faltas</span>
+                    </div>
+                  </div>
+                  
+                  <div className="summary-item">
+                    <div className="summary-icon blue">💰</div>
+                    <div className="summary-text">
+                      <span className="summary-number">R$ 800</span>
+                      <span className="summary-label">Valor Total</span>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-
-
           </div>
         )
       case 'agendar':
@@ -514,7 +512,43 @@ const AreaPaciente = () => {
                     </div>
                     <div className="detail-item">
                       <label>Email</label>
-                      <span>maria.silva@email.com</span>
+                      {isEditingEmail ? (
+                        <div className="edit-field">
+                          <input 
+                            type="email" 
+                            value={editedEmail}
+                            onChange={(e) => setEditedEmail(e.target.value)}
+                            className="edit-input"
+                          />
+                          <div className="edit-actions">
+                            <button 
+                              className="save-btn"
+                              onClick={() => setIsEditingEmail(false)}
+                            >
+                              ✓
+                            </button>
+                            <button 
+                              className="cancel-btn"
+                              onClick={() => {
+                                setEditedEmail('maria.silva@email.com')
+                                setIsEditingEmail(false)
+                              }}
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="view-field">
+                          <span>{editedEmail}</span>
+                          <button 
+                            className="edit-btn"
+                            onClick={() => setIsEditingEmail(true)}
+                          >
+                            ✏️
+                          </button>
+                        </div>
+                      )}
                     </div>
                     <div className="detail-item">
                       <label>CPF</label>
@@ -522,7 +556,43 @@ const AreaPaciente = () => {
                     </div>
                     <div className="detail-item">
                       <label>Telefone</label>
-                      <span>(11) 99999-9999</span>
+                      {isEditingPhone ? (
+                        <div className="edit-field">
+                          <input 
+                            type="tel" 
+                            value={editedPhone}
+                            onChange={(e) => setEditedPhone(e.target.value)}
+                            className="edit-input"
+                          />
+                          <div className="edit-actions">
+                            <button 
+                              className="save-btn"
+                              onClick={() => setIsEditingPhone(false)}
+                            >
+                              ✓
+                            </button>
+                            <button 
+                              className="cancel-btn"
+                              onClick={() => {
+                                setEditedPhone('(11) 99999-9999')
+                                setIsEditingPhone(false)
+                              }}
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="view-field">
+                          <span>{editedPhone}</span>
+                          <button 
+                            className="edit-btn"
+                            onClick={() => setIsEditingPhone(true)}
+                          >
+                            ✏️
+                          </button>
+                        </div>
+                      )}
                     </div>
                     <div className="detail-item">
                       <label>Data de Nascimento</label>
@@ -530,12 +600,41 @@ const AreaPaciente = () => {
                     </div>
                   </div>
                 </div>
+                
+                <div className="detail-section">
+                  <h4>Complementos</h4>
+                  <div className="detail-grid">
+                    <div className="detail-item">
+                      <label>CEP</label>
+                      <span>01234-567</span>
+                    </div>
+                    <div className="detail-item">
+                      <label>Endereço</label>
+                      <span>Rua das Flores, 123</span>
+                    </div>
+                    <div className="detail-item">
+                      <label>Bairro</label>
+                      <span>Centro</span>
+                    </div>
+                    <div className="detail-item">
+                      <label>Cidade</label>
+                      <span>São Paulo</span>
+                    </div>
+                    <div className="detail-item">
+                      <label>Estado</label>
+                      <span>SP</span>
+                    </div>
+                    <div className="detail-item">
+                      <label>Complemento</label>
+                      <span>Apto 45</span>
+                    </div>
+                  </div>
+                </div>
 
               </div>
               
               <div className="profile-actions">
-                <button className="primary-btn">Editar Perfil</button>
-                <button className="secondary-btn">Alterar Senha</button>
+                <button className="secondary-btn" onClick={() => navigate('/alterar-senha')}>Alterar Senha</button>
               </div>
             </div>
           </div>
@@ -547,40 +646,11 @@ const AreaPaciente = () => {
 
   return (
     <div className="area-profissional">
-      <div className="sidebar">
-        <div className="sidebar-header">
-          <h2>ADC Paciente</h2>
-        </div>
-        
-        <nav className="sidebar-nav">
-          {menuItems.map(item => (
-            <button
-              key={item.id}
-              className={`nav-item ${activeSection === item.id ? 'active' : ''}`}
-              onClick={() => setActiveSection(item.id)}
-            >
-              <span className="nav-label">{item.label}</span>
-              {item.badge && <span className="notification-badge">{item.badge}</span>}
-            </button>
-          ))}
-        </nav>
-        
-        <div className="sidebar-footer">
-          {footerItems.map(item => (
-            <button
-              key={item.id}
-              className={`nav-item ${activeSection === item.id ? 'active' : ''}`}
-              onClick={() => setActiveSection(item.id)}
-            >
-              <span className="nav-label">{item.label}</span>
-              {item.badge && <span className="notification-badge">{item.badge}</span>}
-            </button>
-          ))}
-          <button className="nav-item logout" onClick={handleLogout}>
-            <span className="nav-label">Sair</span>
-          </button>
-        </div>
-      </div>
+      <SidebarPaciente 
+        activeSection={activeSection} 
+        setActiveSection={setActiveSection} 
+        notifications={notifications} 
+      />
       <div className="main-content">
         <header className="top-header">
           <h1>Bem-vindo ao Dashboard</h1>

@@ -10,6 +10,7 @@ import Agendar from './Agendar';
 import AreaProfissional from './AreaProfissional';
 import AreaPaciente from './AreaPaciente';
 import Cancelar from './Cancelar';
+import AlterarSenha from './AlterarSenha';
 
 function App() {
   return(
@@ -26,6 +27,7 @@ function App() {
         <Route path="/areaprofissional" element={<AreaProfissional />} />
         <Route path="/areapaciente" element={<AreaPaciente />} />
         <Route path="/cancelar" element={<Cancelar />} />
+        <Route path="/alterar-senha" element={<AlterarSenha />} />
         <Route path="*" element={<div><h1>404 - Página não encontrada</h1></div>} />
       </Routes>
     </Router>

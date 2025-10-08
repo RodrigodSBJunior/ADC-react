@@ -16,7 +16,7 @@ const Home = () => {
           <h1>Sua saúde em primeiro lugar</h1>
           <p>Agende sua consulta de forma rápida e prática com a gente!</p>
         </div>
-        <Link to="/agendar">
+        <Link to="/entrar">
           <button className="btn-contrate">Agendar Consulta</button>
         </Link>
       </div>

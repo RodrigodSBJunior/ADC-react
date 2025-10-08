@@ -1,6 +1,11 @@
 import { useState } from 'react'
 import './Entrar.css'
 import { Link, useNavigate } from 'react-router-dom';
+import logo from './assets/shared image.png';
+import pacienteImg from './assets/paciente.png';
+import pacienteHoverImg from './assets/paciente (1).png';
+import psicologiaImg from './assets/psicologia.png';
+import psicologiaSelectedImg from './assets/psicologia (1).png';
 
 const Entrar = () => {
   const [userType, setUserType] = useState('');
@@ -28,7 +33,11 @@ const Entrar = () => {
       <button className="back-btn" onClick={handleBack}>
         ← Voltar
       </button>
-      <div className="login-card">
+      <div className="content-wrapper">
+        <div className="logo-section">
+          <img src={logo} alt="ADC Psicologia" />
+        </div>
+        <div className="login-card">
         <h1>Faça seu Login</h1>
         <br />
         <div className="user-type-selection">
@@ -39,10 +48,17 @@ const Entrar = () => {
                 userType === "paciente" ? "selected" : ""
               }`}
               onClick={() => setUserType("paciente")}
+              onMouseEnter={(e) => {
+                const img = e.currentTarget.querySelector('.card-image');
+                if (img) img.src = pacienteHoverImg;
+              }}
+              onMouseLeave={(e) => {
+                const img = e.currentTarget.querySelector('.card-image');
+                if (img) img.src = pacienteImg;
+              }}
             >
-              <div className="card-icon">👤</div>
+              <img src={pacienteImg} alt="Paciente" className="card-image" />
               <h4>Paciente</h4>
-              <p>Agendar consultas</p>
             </div>
             <div
               className={`user-card ${
@@ -50,9 +66,8 @@ const Entrar = () => {
               }`}
               onClick={() => setUserType("profissional")}
             >
-              <div className="card-icon">👨‍⚕️</div>
+              <img src={userType === "profissional" ? psicologiaSelectedImg : psicologiaImg} alt="Profissional" className="card-image" />
               <h4>Profissional</h4>
-              <p>Gerenciar agenda</p>
             </div>
           </div>
         </div>
@@ -86,6 +101,7 @@ const Entrar = () => {
             Criar conta
           </button>
         </form>
+        </div>
       </div>
     </div>
   );

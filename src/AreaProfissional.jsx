@@ -1,10 +1,9 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import './AreaProfissional.css'
 import { useNavigate } from 'react-router-dom'
 
 const AreaProfissional = () => {
   const [activeSection, setActiveSection] = useState('dashboard')
-  const [notifications] = useState(3)
   const [selectedDate, setSelectedDate] = useState(null)
   const [selectedTimes, setSelectedTimes] = useState([])
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth())
@@ -33,13 +32,48 @@ const AreaProfissional = () => {
     { id: 2, date: '2024-12-19', time: '10:00', patient: 'Carlos Lima', motivo: 'Emergência familiar', canceladoPor: 'Profissional', dataCancelamento: '2024-12-18' },
     { id: 3, date: '2024-12-14', time: '16:30', patient: 'Maria Santos', motivo: 'Viagem imprevista', canceladoPor: 'Paciente', dataCancelamento: '2024-12-13' }
   ])
+  const [isScrolled, setIsScrolled] = useState(false)
+  const [isEditingLocation, setIsEditingLocation] = useState(false)
+  const [locationData, setLocationData] = useState({
+    endereco: 'Rua das Clínicas, 123',
+    complemento: 'Sala 101',
+    bairro: 'Centro',
+    cidade: 'São Paulo',
+    cep: '01234-567'
+  })
+  const [copyMode, setCopyMode] = useState(false)
+  const [selectedDaysForCopy, setSelectedDaysForCopy] = useState([])
+  const [notificationsList, setNotificationsList] = useState([
+    { id: 1, icon: '👥', title: 'Nova consulta agendada', message: 'Maria Silva agendou consulta para 15/01 às 14:00', time: 'Há 1 hora', read: false },
+    { id: 2, icon: '⚠️', title: 'Cancelamento de consulta', message: 'João Santos cancelou a consulta de amanhã às 10:00', time: 'Há 3 horas', read: false },
+    { id: 3, icon: '🔔', title: 'Lembrete de agenda', message: 'Você tem 5 consultas agendadas para hoje', time: 'Há 6 horas', read: false }
+  ])
+  const [isEditingName, setIsEditingName] = useState(false)
+  const [editedName, setEditedName] = useState('Dr. João Santos Silva')
+  const [isEditingEmail, setIsEditingEmail] = useState(false)
+  const [editedEmail, setEditedEmail] = useState('dr.joao@adcpsicologia.com')
+  const [isEditingPhone, setIsEditingPhone] = useState(false)
+  const [editedPhone, setEditedPhone] = useState('(11) 98888-8888')
+  const unreadNotifications = useMemo(() => notificationsList.filter(n => !n.read).length, [notificationsList])
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50)
+    }
+    
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   const handleLogout = () => {
     navigate('/')
   }
 
-  const timeSlots = ['08:00', '09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00']
+  const timeSlots = [
+    '00:00', '01:00', '02:00', '03:00', '04:00', '05:00', '06:00', '07:00', '08:00', '09:00', '10:00', '11:00',
+    '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00', '23:00'
+  ]
 
   const generateCalendar = () => {
     const firstDay = new Date(currentYear, currentMonth, 1)
@@ -61,14 +95,24 @@ const AreaProfissional = () => {
           className={`calendar-day ${
             isCurrentMonth ? 'current-month' : 'other-month'
           } ${
-            selectedDate === dateStr ? 'selected' : ''
+            selectedDate === dateStr && !copyMode ? 'selected' : ''
+          } ${
+            selectedDaysForCopy.includes(dateStr) && copyMode ? 'selected' : ''
           } ${
             hasAgenda ? 'has-agenda' : ''
           }`}
           onClick={() => {
             if (isCurrentMonth) {
-              setSelectedDate(dateStr)
-              setSelectedTimes(agenda[dateStr] || [])
+              if (copyMode) {
+                setSelectedDaysForCopy(prev => 
+                  prev.includes(dateStr) 
+                    ? prev.filter(d => d !== dateStr)
+                    : [...prev, dateStr]
+                )
+              } else {
+                setSelectedDate(dateStr)
+                setSelectedTimes(agenda[dateStr] || [])
+              }
             }
           }}
         >
@@ -101,269 +145,361 @@ const AreaProfissional = () => {
   }
 
   const menuItems = [
-    { id: 'dashboard', icon: '🏠', label: 'Dashboard' },
-    { id: 'criar-agenda', icon: '📅', label: 'Criar Agenda' },
-    { id: 'visualizar-agenda', icon: '📋', label: 'Visualizar Agenda' },
-    { id: 'consultas-passadas', icon: '📄', label: 'Consultas Passadas' },
-    { id: 'cancelar-consultas', icon: '❌', label: 'Cancelar Consultas' },
-    { id: 'consultas-canceladas', icon: '🚫', label: 'Consultas Canceladas' },
-    { id: 'pacientes', icon: '👥', label: 'Ver Pacientes' }
+    { id: 'dashboard', label: 'Dashboard' },
+    { id: 'criar-agenda', label: 'Criar Agenda' },
+    { id: 'visualizar-agenda', label: 'Visualizar Agenda' },
+    { id: 'consultas-passadas', label: 'Consultas Passadas' },
+    { id: 'cancelar-consultas', label: 'Cancelar Consultas' },
+    { id: 'consultas-canceladas', label: 'Consultas Canceladas' },
+    { id: 'pacientes', label: 'Ver Pacientes' },
+    { id: 'locais', label: 'Locais' }
   ]
 
   const renderContent = () => {
     switch(activeSection) {
       case 'dashboard':
+        const hoje = new Date().toISOString().split('T')[0]
+        const consultasHoje = consultas.filter(c => c.date === hoje)
+        const consultasConfirmadas = consultasHoje.filter(c => c.status === 'Confirmado')
+        const consultasPendentes = consultasHoje.filter(c => c.status === 'Pendente')
+        
         return (
-          <div className="dashboard-content">
-            <div className="cards-grid">
-              <div className="feature-card" onClick={() => setActiveSection('criar-agenda')}>
-                <div className="card-icon">📅</div>
-                <h3>Criar Agenda</h3>
-                <p>Defina seus horários disponíveis</p>
+          <div style={{ padding: '20px' }}>
+            <div style={{ marginBottom: '30px' }}>
+              <h2 style={{ color: '#1e293b', marginBottom: '5px' }}>Dashboard</h2>
+              <p style={{ color: '#64748b', margin: 0 }}>{new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
+            </div>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '30px' }}>
+              <div style={{ background: '#3b82f6', color: 'white', padding: '20px', borderRadius: '12px' }}>
+                <div style={{ fontSize: '28px', fontWeight: 'bold' }}>{consultasHoje.length}</div>
+                <div style={{ fontSize: '14px', opacity: 0.9 }}>Consultas Hoje</div>
               </div>
               
-              <div className="feature-card" onClick={() => setActiveSection('visualizar-agenda')}>
-                <div className="card-icon">📋</div>
-                <h3>Visualizar Agenda</h3>
-                <p>Veja seus agendamentos</p>
+              <div style={{ background: '#10b981', color: 'white', padding: '20px', borderRadius: '12px' }}>
+                <div style={{ fontSize: '28px', fontWeight: 'bold' }}>{consultas.length}</div>
+                <div style={{ fontSize: '14px', opacity: 0.9 }}>Total Agendadas</div>
               </div>
               
-              <div className="feature-card" onClick={() => setActiveSection('consultas-passadas')}>
-                <div className="card-icon">📄</div>
-                <h3>Consultas Passadas</h3>
-                <p>Histórico de atendimentos</p>
+              <div style={{ background: '#f59e0b', color: 'white', padding: '20px', borderRadius: '12px' }}>
+                <div style={{ fontSize: '28px', fontWeight: 'bold' }}>{consultasPassadas.length}</div>
+                <div style={{ fontSize: '14px', opacity: 0.9 }}>Realizadas</div>
               </div>
               
-              <div className="feature-card" onClick={() => setActiveSection('cancelar-consultas')}>
-                <div className="card-icon">❌</div>
-                <h3>Cancelar Consultas</h3>
-                <p>Gerencie cancelamentos</p>
+              <div style={{ background: '#8b5cf6', color: 'white', padding: '20px', borderRadius: '12px' }}>
+                <div style={{ fontSize: '28px', fontWeight: 'bold' }}>4.8</div>
+                <div style={{ fontSize: '14px', opacity: 0.9 }}>Avaliação</div>
+              </div>
+            </div>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '20px' }}>
+              <div style={{ background: 'white', padding: '20px', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
+                <h3 style={{ color: '#1e293b', marginBottom: '20px' }}>Agenda de Hoje</h3>
+                {consultasHoje.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>
+                    <p>Nenhuma consulta hoje</p>
+                  </div>
+                ) : (
+                  <div>
+                    {consultasHoje.map(consulta => (
+                      <div key={consulta.id} style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '12px',
+                        background: '#f8fafc',
+                        borderRadius: '8px',
+                        marginBottom: '8px'
+                      }}>
+                        <div>
+                          <div style={{ fontWeight: '600' }}>{consulta.time}</div>
+                          <div style={{ color: '#64748b', fontSize: '14px' }}>{consulta.patient}</div>
+                        </div>
+                        <span style={{
+                          padding: '4px 8px',
+                          borderRadius: '12px',
+                          fontSize: '12px',
+                          background: consulta.status === 'Confirmado' ? '#d1fae5' : '#fef3c7',
+                          color: consulta.status === 'Confirmado' ? '#065f46' : '#92400e'
+                        }}>
+                          {consulta.status}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
               
-              <div className="feature-card" onClick={() => setActiveSection('pacientes')}>
-                <div className="card-icon">👥</div>
-                <h3>Ver Pacientes</h3>
-                <p>Lista de todos os pacientes</p>
+              <div style={{ background: 'white', padding: '20px', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
+                <h3 style={{ color: '#1e293b', marginBottom: '20px' }}>Ações Rápidas</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <button 
+                    onClick={() => setActiveSection('criar-agenda')}
+                    style={{
+                      background: '#3b82f6',
+                      color: 'white',
+                      border: 'none',
+                      padding: '12px',
+                      borderRadius: '8px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Criar Agenda
+                  </button>
+                  <button 
+                    onClick={() => setActiveSection('visualizar-agenda')}
+                    style={{
+                      background: '#10b981',
+                      color: 'white',
+                      border: 'none',
+                      padding: '12px',
+                      borderRadius: '8px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Ver Agenda
+                  </button>
+                  <button 
+                    onClick={() => setActiveSection('pacientes')}
+                    style={{
+                      background: '#f59e0b',
+                      color: 'white',
+                      border: 'none',
+                      padding: '12px',
+                      borderRadius: '8px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Pacientes
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         )
       case 'criar-agenda':
         return (
-          <div style={{
-            fontFamily: 'Inter, sans-serif',
-            maxWidth: '1400px',
-            margin: '0 auto',
-            padding: '5px'
-          }}>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '250px 1fr', gap: '10px' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                <div style={{
-                  background: 'white',
-                  borderRadius: '15px',
-                  padding: '20px',
-                  boxShadow: '0 8px 25px rgba(0,0,0,0.08)'
-                }}>
-                  <h3 style={{ margin: '0 0 10px 0', color: '#1e293b', fontSize: '14px' }}>Configuração Rápida</h3>
-                  <button 
-                    onClick={() => {
-                      const today = new Date()
-                      const newAgenda = {}
-                      for (let i = 1; i <= 7; i++) {
-                        const date = new Date(today)
-                        date.setDate(today.getDate() + i)
-                        if (date.getDay() !== 0 && date.getDay() !== 6) {
-                          const dateStr = date.toISOString().split('T')[0]
-                          newAgenda[dateStr] = ['09:00', '10:00', '14:00', '15:00', '16:00']
-                        }
-                      }
-                      setAgenda(prev => ({ ...prev, ...newAgenda }))
-                      alert('Agenda da semana criada!')
-                    }}
-                    style={{
-                      width: '100%',
-                      padding: '12px',
-                      background: '#667eea',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      fontWeight: '600',
-                      fontSize: '12px',
-                      marginBottom: '8px'
-                    }}
-                  >
-                    📅 Próxima Semana
-                  </button>
-                  <button 
-                    onClick={() => {
-                      const today = new Date()
-                      const newAgenda = {}
-                      const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate()
-                      
-                      for (let day = today.getDate(); day <= daysInMonth; day++) {
-                        const date = new Date(today.getFullYear(), today.getMonth(), day)
-                        if (date.getDay() !== 0 && date.getDay() !== 6) {
-                          const dateStr = date.toISOString().split('T')[0]
-                          newAgenda[dateStr] = ['08:00', '09:00', '10:00', '14:00', '15:00', '16:00']
-                        }
-                      }
-                      setAgenda(prev => ({ ...prev, ...newAgenda }))
-                      alert('Agenda do mês criada!')
-                    }}
-                    style={{
-                      width: '100%',
-                      padding: '12px',
-                      background: '#10b981',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      fontWeight: '600',
-                      fontSize: '12px'
-                    }}
-                  >
-                    📆 Este Mês
-                  </button>
-                </div>
-
-                <div style={{
-                  background: 'white',
-                  borderRadius: '15px',
-                  padding: '20px',
-                  boxShadow: '0 8px 25px rgba(0,0,0,0.08)'
-                }}>
-                  <h3 style={{ margin: '0 0 10px 0', color: '#1e293b', fontSize: '14px' }}>Agenda Atual</h3>
-                  {Object.keys(agenda).length === 0 ? (
-                    <div style={{ textAlign: 'center', color: '#6b7280', padding: '20px' }}>
-                      <div style={{ fontSize: '2rem', marginBottom: '10px' }}>📅</div>
-                      <p>Nenhuma agenda criada</p>
-                    </div>
-                  ) : (
-                    <div style={{ maxHeight: '150px', overflowY: 'auto' }}>
-                      {Object.entries(agenda).slice(0, 5).map(([date, times]) => {
-                        const [year, month, day] = date.split('-')
-                        return (
-                          <div key={date} style={{
-                            padding: '5px',
-                            background: '#f8fafc',
-                            borderRadius: '6px',
-                            marginBottom: '4px',
-                            borderLeft: '3px solid #667eea'
-                          }}>
-                            <div style={{ fontWeight: '600', fontSize: '12px', color: '#667eea' }}>
-                              {new Date(date).toLocaleDateString('pt-BR', { weekday: 'short' }).toUpperCase()}
-                            </div>
-                            <div style={{ fontSize: '14px', color: '#374151' }}>{day}/{month}</div>
-                            <div style={{ fontSize: '11px', color: '#6b7280' }}>
-                              {times.length} horários
-                            </div>
-                          </div>
-                        )
-                      })}
-                    </div>
+          <div style={{ padding: '20px' }}>
+            <div style={{ marginBottom: '30px' }}>
+              <h2 style={{ color: '#1e293b', marginBottom: '5px' }}>Criar Agenda</h2>
+              <p style={{ color: '#64748b', margin: 0 }}>Selecione os dias e horários</p>
+            </div>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+              <div style={{ background: 'white', padding: '20px', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                  <h3 style={{ color: '#1e293b', margin: 0 }}>Calendário</h3>
+                  {copyMode && (
+                    <span style={{ background: '#fef3c7', color: '#92400e', padding: '4px 8px', borderRadius: '12px', fontSize: '12px', fontWeight: '600' }}>
+                      Modo Copia - Selecione os dias
+                    </span>
                   )}
                 </div>
-              </div>
-
-              <div style={{
-                background: 'white',
-                borderRadius: '20px',
-                padding: '30px',
-                boxShadow: '0 8px 25px rgba(0,0,0,0.08)'
-              }}>
                 <div style={{ marginBottom: '20px' }}>
-                  <h3 style={{ color: '#1e293b', marginBottom: '10px', fontSize: '16px' }}>Configuração Personalizada</h3>
-                  <input 
-                    type="date" 
-                    value={selectedDate || ''}
-                    onChange={(e) => {
-                      setSelectedDate(e.target.value)
-                      setSelectedTimes(agenda[e.target.value] || [])
-                    }}
-                    min={new Date().toISOString().split('T')[0]}
-                    style={{
-                      width: '100%',
-                      padding: '12px',
-                      border: '2px solid #e5e7eb',
-                      borderRadius: '8px',
-                      fontSize: '14px'
-                    }}
-                  />
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                    <button 
+                      onClick={() => {
+                        if (currentMonth === 0) {
+                          setCurrentMonth(11)
+                          setCurrentYear(currentYear - 1)
+                        } else {
+                          setCurrentMonth(currentMonth - 1)
+                        }
+                      }}
+                      style={{ background: '#f3f4f6', border: 'none', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer' }}
+                    >
+                      ←
+                    </button>
+                    <h4 style={{ margin: 0 }}>
+                      {new Date(currentYear, currentMonth).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
+                    </h4>
+                    <button 
+                      onClick={() => {
+                        if (currentMonth === 11) {
+                          setCurrentMonth(0)
+                          setCurrentYear(currentYear + 1)
+                        } else {
+                          setCurrentMonth(currentMonth + 1)
+                        }
+                      }}
+                      style={{ background: '#f3f4f6', border: 'none', padding: '8px 12px', borderRadius: '6px', cursor: 'pointer' }}
+                    >
+                      →
+                    </button>
+                  </div>
+                  
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '2px', marginBottom: '10px' }}>
+                    {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map(day => (
+                      <div key={day} style={{ padding: '8px', textAlign: 'center', fontSize: '12px', fontWeight: '600', color: '#64748b' }}>
+                        {day}
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '2px' }}>
+                    {generateCalendar()}
+                  </div>
                 </div>
-                
-                {selectedDate && (
+              </div>
+              
+              <div style={{ background: 'white', padding: '20px', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
+                <h3 style={{ color: '#1e293b', marginBottom: '20px' }}>Horários</h3>
+                {selectedDate ? (
                   <div>
-                    <h4 style={{ color: '#374151', marginBottom: '10px', fontSize: '14px' }}>Horários disponíveis:</h4>
-                    <div style={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))',
-                      gap: '8px',
-                      marginBottom: '20px',
-                      maxHeight: '200px',
-                      overflowY: 'auto',
-                      padding: '10px',
-                      border: '1px solid #e5e7eb',
-                      borderRadius: '8px'
-                    }}>
+                    <p style={{ marginBottom: '15px', color: '#64748b' }}>
+                      Data: {new Date(selectedDate).toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
+                    </p>
+                    
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '6px', marginBottom: '20px', maxHeight: '300px', overflowY: 'auto' }}>
                       {timeSlots.map(slot => (
-                        <div
+                        <button
                           key={slot}
                           onClick={() => toggleTimeSlot(slot)}
                           style={{
-                            padding: '6px',
-                            border: '1px solid #e5e7eb',
-                            borderRadius: '4px',
-                            textAlign: 'center',
+                            padding: '8px',
+                            border: '2px solid',
+                            borderRadius: '6px',
                             cursor: 'pointer',
-                            fontSize: '11px',
-                            fontWeight: '500',
-                            background: selectedTimes.includes(slot) ? '#667eea' : 'white',
+                            fontSize: '14px',
+                            background: selectedTimes.includes(slot) ? '#3b82f6' : 'white',
                             color: selectedTimes.includes(slot) ? 'white' : '#374151',
-                            borderColor: selectedTimes.includes(slot) ? '#667eea' : '#e5e7eb'
+                            borderColor: selectedTimes.includes(slot) ? '#3b82f6' : '#d1d5db'
                           }}
                         >
                           {slot}
-                        </div>
+                        </button>
                       ))}
                     </div>
-                    <div style={{ display: 'flex', gap: '10px' }}>
+                    
+                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                       <button 
                         onClick={saveAgenda}
+                        disabled={selectedTimes.length === 0}
                         style={{
                           flex: '1',
                           padding: '12px',
-                          background: '#10b981',
+                          background: selectedTimes.length > 0 ? '#10b981' : '#d1d5db',
                           color: 'white',
                           border: 'none',
                           borderRadius: '8px',
-                          fontWeight: '600',
-                          cursor: 'pointer'
+                          cursor: selectedTimes.length > 0 ? 'pointer' : 'not-allowed'
                         }}
                       >
-                        💾 Salvar
+                        Salvar ({selectedTimes.length})
                       </button>
-                      <button 
-                        onClick={() => {
-                          const newAgenda = { ...agenda }
-                          delete newAgenda[selectedDate]
-                          setAgenda(newAgenda)
-                          setSelectedTimes([])
-                        }}
-                        style={{
-                          flex: '1',
-                          padding: '12px',
-                          background: '#ef4444',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '8px',
-                          fontWeight: '600',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        🗑️ Limpar
-                      </button>
+                      {!copyMode ? (
+                        <button 
+                          onClick={() => {
+                            if (selectedTimes.length > 0) {
+                              setCopyMode(true)
+                              setSelectedDaysForCopy([])
+                            }
+                          }}
+                          disabled={selectedTimes.length === 0}
+                          style={{
+                            padding: '12px',
+                            background: selectedTimes.length > 0 ? '#f59e0b' : '#d1d5db',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '8px',
+                            cursor: selectedTimes.length > 0 ? 'pointer' : 'not-allowed'
+                          }}
+                        >
+                          Copiar
+                        </button>
+                      ) : (
+                        <>
+                          <button 
+                            onClick={() => {
+                              if (selectedDaysForCopy.length > 0) {
+                                const newAgenda = { ...agenda }
+                                selectedDaysForCopy.forEach(date => {
+                                  newAgenda[date] = [...selectedTimes]
+                                })
+                                setAgenda(newAgenda)
+                                setCopyMode(false)
+                                setSelectedDaysForCopy([])
+                                alert(`Horários copiados para ${selectedDaysForCopy.length} dias!`)
+                              }
+                            }}
+                            disabled={selectedDaysForCopy.length === 0}
+                            style={{
+                              padding: '12px',
+                              background: selectedDaysForCopy.length > 0 ? '#10b981' : '#d1d5db',
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '8px',
+                              cursor: selectedDaysForCopy.length > 0 ? 'pointer' : 'not-allowed'
+                            }}
+                          >
+                            Aplicar ({selectedDaysForCopy.length})
+                          </button>
+                          <button 
+                            onClick={() => {
+                              setCopyMode(false)
+                              setSelectedDaysForCopy([])
+                            }}
+                            style={{
+                              padding: '12px',
+                              background: '#ef4444',
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '8px',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            Cancelar
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <p style={{ color: '#64748b', textAlign: 'center', padding: '40px' }}>Selecione um dia no calendário</p>
+                )}
+                
+                {Object.keys(agenda).length > 0 && (
+                  <div style={{ marginTop: '30px' }}>
+                    <h4 style={{ color: '#1e293b', marginBottom: '15px' }}>Agenda Criada</h4>
+                    <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                      {Object.entries(agenda).map(([date, times]) => (
+                        <div key={date} style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          padding: '10px',
+                          background: '#f8fafc',
+                          borderRadius: '6px',
+                          marginBottom: '5px'
+                        }}>
+                          <div>
+                            <div style={{ fontWeight: '600', fontSize: '14px' }}>
+                              {new Date(date).toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' })}
+                            </div>
+                            <div style={{ fontSize: '12px', color: '#64748b' }}>
+                              {times.length} horários
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => {
+                              const newAgenda = { ...agenda }
+                              delete newAgenda[date]
+                              setAgenda(newAgenda)
+                            }}
+                            style={{
+                              background: '#fee2e2',
+                              color: '#dc2626',
+                              border: 'none',
+                              padding: '4px 8px',
+                              borderRadius: '4px',
+                              cursor: 'pointer',
+                              fontSize: '12px'
+                            }}
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 )}
@@ -378,21 +514,20 @@ const AreaProfissional = () => {
         
         return (
           <div className="section-content">
-            <h2>📋 Visualizar Agenda</h2>
+            <h2>Visualizar Agenda</h2>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
               <div style={{
                 background: 'white',
                 padding: '20px',
                 borderRadius: '12px',
-                boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
+                boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
               }}>
-                <h3 style={{ color: '#1e40af', marginBottom: '15px' }}>Consultas de Hoje</h3>
-                <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '15px' }}>
+                <h3 style={{ color: '#1e293b', marginBottom: '15px' }}>Consultas de Hoje</h3>
+                <div style={{ fontSize: '14px', color: '#64748b', marginBottom: '15px' }}>
                   {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
                 </div>
                 {todayConsultas.length === 0 ? (
-                  <div style={{ textAlign: 'center', color: '#6b7280', padding: '20px' }}>
-                    <div style={{ fontSize: '2rem', marginBottom: '10px' }}>📅</div>
+                  <div style={{ textAlign: 'center', color: '#64748b', padding: '20px' }}>
                     <p>Nenhuma consulta hoje</p>
                   </div>
                 ) : (
@@ -405,18 +540,16 @@ const AreaProfissional = () => {
                         padding: '12px',
                         background: '#f8fafc',
                         borderRadius: '8px',
-                        marginBottom: '8px',
-                        borderLeft: '4px solid #3b82f6'
+                        marginBottom: '8px'
                       }}>
                         <div>
-                          <div style={{ fontWeight: '600', color: '#1f2937' }}>{consulta.time}</div>
-                          <div style={{ fontSize: '14px', color: '#6b7280' }}>{consulta.patient}</div>
+                          <div style={{ fontWeight: '600' }}>{consulta.time}</div>
+                          <div style={{ fontSize: '14px', color: '#64748b' }}>{consulta.patient}</div>
                         </div>
                         <span style={{
                           padding: '4px 8px',
                           borderRadius: '12px',
                           fontSize: '12px',
-                          fontWeight: '600',
                           background: consulta.status === 'Confirmado' ? '#d1fae5' : '#fef3c7',
                           color: consulta.status === 'Confirmado' ? '#065f46' : '#92400e'
                         }}>
@@ -426,35 +559,89 @@ const AreaProfissional = () => {
                     ))}
                   </div>
                 )}
+                
+                <div style={{ marginTop: '30px' }}>
+                  <h4 style={{ color: '#1e293b', marginBottom: '15px' }}>Calendário</h4>
+                  <div style={{ marginBottom: '15px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                      <button 
+                        onClick={() => {
+                          if (currentMonth === 0) {
+                            setCurrentMonth(11)
+                            setCurrentYear(currentYear - 1)
+                          } else {
+                            setCurrentMonth(currentMonth - 1)
+                          }
+                        }}
+                        style={{ background: '#f3f4f6', border: 'none', padding: '6px 10px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}
+                      >
+                        ←
+                      </button>
+                      <span style={{ fontSize: '14px', fontWeight: '600' }}>
+                        {new Date(currentYear, currentMonth).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
+                      </span>
+                      <button 
+                        onClick={() => {
+                          if (currentMonth === 11) {
+                            setCurrentMonth(0)
+                            setCurrentYear(currentYear + 1)
+                          } else {
+                            setCurrentMonth(currentMonth + 1)
+                          }
+                        }}
+                        style={{ background: '#f3f4f6', border: 'none', padding: '6px 10px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}
+                      >
+                        →
+                      </button>
+                    </div>
+                    
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '1px', marginBottom: '5px' }}>
+                      {['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map(day => (
+                        <div key={day} style={{ padding: '4px', textAlign: 'center', fontSize: '10px', fontWeight: '600', color: '#64748b' }}>
+                          {day}
+                        </div>
+                      ))}
+                    </div>
+                    
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '1px' }}>
+                      {generateCalendar().map((day, index) => (
+                        <div key={index} style={{
+                          ...day.props.style,
+                          padding: '6px 4px',
+                          textAlign: 'center',
+                          fontSize: '12px',
+                          cursor: 'pointer',
+                          borderRadius: '4px',
+                          background: viewDate === day.key ? '#3b82f6' : day.props.className.includes('has-agenda') ? '#e0f2fe' : 'transparent',
+                          color: viewDate === day.key ? 'white' : day.props.className.includes('other-month') ? '#d1d5db' : '#374151'
+                        }}
+                        onClick={() => {
+                          if (day.props.className.includes('current-month')) {
+                            setViewDate(day.key)
+                          }
+                        }}
+                        >
+                          {day.props.children}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
               
               <div style={{
                 background: 'white',
                 padding: '20px',
                 borderRadius: '12px',
-                boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
+                boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
               }}>
-                <h3 style={{ color: '#1e40af', marginBottom: '15px' }}>Selecionar Data</h3>
-                <input 
-                  type="date" 
-                  value={viewDate}
-                  onChange={(e) => setViewDate(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '10px',
-                    border: '2px solid #e5e7eb',
-                    borderRadius: '8px',
-                    marginBottom: '15px'
-                  }}
-                />
-                
-                <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '10px' }}>
-                  Consultas para {new Date(viewDate).toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}:
+                <h3 style={{ color: '#1e293b', marginBottom: '15px' }}>Consultas do Dia</h3>
+                <div style={{ fontSize: '14px', color: '#64748b', marginBottom: '15px' }}>
+                  {new Date(viewDate).toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
                 </div>
                 
                 {selectedDateConsultas.length === 0 ? (
-                  <div style={{ textAlign: 'center', color: '#6b7280', padding: '20px' }}>
-                    <div style={{ fontSize: '1.5rem', marginBottom: '10px' }}>📭</div>
+                  <div style={{ textAlign: 'center', color: '#64748b', padding: '40px' }}>
                     <p>Nenhuma consulta nesta data</p>
                   </div>
                 ) : (
@@ -464,21 +651,19 @@ const AreaProfissional = () => {
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
-                        padding: '10px',
+                        padding: '12px',
                         background: '#f0f9ff',
-                        borderRadius: '6px',
-                        marginBottom: '6px',
-                        borderLeft: '3px solid #0ea5e9'
+                        borderRadius: '8px',
+                        marginBottom: '8px'
                       }}>
                         <div>
                           <div style={{ fontWeight: '600', fontSize: '14px' }}>{consulta.time}</div>
-                          <div style={{ fontSize: '12px', color: '#6b7280' }}>{consulta.patient}</div>
+                          <div style={{ fontSize: '12px', color: '#64748b' }}>{consulta.patient}</div>
                         </div>
                         <span style={{
-                          padding: '2px 6px',
+                          padding: '4px 8px',
                           borderRadius: '8px',
-                          fontSize: '10px',
-                          fontWeight: '600',
+                          fontSize: '12px',
                           background: consulta.status === 'Confirmado' ? '#dcfce7' : '#fef3c7',
                           color: consulta.status === 'Confirmado' ? '#166534' : '#92400e'
                         }}>
@@ -495,7 +680,7 @@ const AreaProfissional = () => {
       case 'consultas-passadas':
         return (
           <div className="section-content">
-            <h2>📄 Consultas Passadas</h2>
+            <h2>Consultas Passadas</h2>
             <div style={{
               background: 'white',
               padding: '20px',
@@ -581,7 +766,7 @@ const AreaProfissional = () => {
         
         return (
           <div className="section-content">
-            <h2>❌ Cancelar Consultas</h2>
+            <h2>Cancelar Consultas</h2>
             <div style={{
               background: 'white',
               padding: '20px',
@@ -659,7 +844,7 @@ const AreaProfissional = () => {
                           fontSize: '14px'
                         }}
                       >
-                        ❌ Cancelar
+                        Cancelar
                       </button>
                     </div>
                   ))}
@@ -671,7 +856,7 @@ const AreaProfissional = () => {
       case 'consultas-canceladas':
         return (
           <div className="section-content">
-            <h2>🚫 Consultas Canceladas</h2>
+            <h2>Consultas Canceladas</h2>
             <div style={{
               background: 'white',
               padding: '20px',
@@ -770,36 +955,352 @@ const AreaProfissional = () => {
       case 'notificacoes':
         return (
           <div className="section-content">
-            <h2>🔔 Notificações</h2>
-            <div className="notifications-card">
-              <div className="notifications-list">
-                <div className="notification-item unread">
-                  <div className="notification-icon">👥</div>
-                  <div className="notification-content">
-                    <h4>Nova consulta agendada</h4>
-                    <p>Maria Silva agendou consulta para 15/01 às 14:00</p>
-                    <span className="notification-time">Há 1 hora</span>
+            <h2>Notificações</h2>
+            <div style={{ background: 'white', padding: '20px', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
+              {notificationsList.length === 0 ? (
+                <div style={{ textAlign: 'center', color: '#64748b', padding: '40px' }}>
+                  <p>Nenhuma notificação</p>
+                </div>
+              ) : (
+                <>
+                  <div style={{ marginBottom: '20px' }}>
+                    {notificationsList.map(notification => (
+                      <div key={notification.id} style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'flex-start',
+                        padding: '15px',
+                        background: notification.read ? '#f8fafc' : '#eff6ff',
+                        borderRadius: '8px',
+                        marginBottom: '10px',
+                        borderLeft: notification.read ? '4px solid #e5e7eb' : '4px solid #3b82f6'
+                      }}>
+                        <div style={{ display: 'flex', gap: '12px', flex: 1 }}>
+                          <div style={{ fontSize: '20px' }}>{notification.icon}</div>
+                          <div style={{ flex: 1 }}>
+                            <h4 style={{ margin: '0 0 5px 0', fontSize: '16px', color: '#1e293b' }}>{notification.title}</h4>
+                            <p style={{ margin: '0 0 5px 0', fontSize: '14px', color: '#64748b' }}>{notification.message}</p>
+                            <span style={{ fontSize: '12px', color: '#9ca3af' }}>{notification.time}</span>
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          {!notification.read && (
+                            <button
+                              onClick={() => {
+                                setNotificationsList(prev => 
+                                  prev.map(n => n.id === notification.id ? { ...n, read: true } : n)
+                                )
+                              }}
+                              style={{
+                                background: '#10b981',
+                                color: 'white',
+                                border: 'none',
+                                padding: '4px 8px',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                fontSize: '12px'
+                              }}
+                            >
+                              Marcar como lida
+                            </button>
+                          )}
+                          <button
+                            onClick={() => {
+                              setNotificationsList(prev => prev.filter(n => n.id !== notification.id))
+                            }}
+                            style={{
+                              background: '#ef4444',
+                              color: 'white',
+                              border: 'none',
+                              padding: '4px 8px',
+                              borderRadius: '4px',
+                              cursor: 'pointer',
+                              fontSize: '12px'
+                            }}
+                          >
+                            Apagar
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    <button 
+                      onClick={() => {
+                        setNotificationsList(prev => prev.map(n => ({ ...n, read: true })))
+                      }}
+                      style={{
+                        background: '#3b82f6',
+                        color: 'white',
+                        border: 'none',
+                        padding: '10px 15px',
+                        borderRadius: '8px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Marcar todas como lidas
+                    </button>
+                    <button 
+                      onClick={() => {
+                        if (confirm('Tem certeza que deseja apagar todas as mensagens?')) {
+                          setNotificationsList([])
+                        }
+                      }}
+                      style={{
+                        background: '#ef4444',
+                        color: 'white',
+                        border: 'none',
+                        padding: '10px 15px',
+                        borderRadius: '8px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Apagar mensagens
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        )
+      case 'locais':
+        return (
+          <div className="section-content">
+            <h2>Clínica</h2>
+            <div className="form-card">
+              <div style={{ display: 'grid', gap: '25px' }}>
+                <div style={{
+                  background: 'white',
+                  padding: '25px',
+                  borderRadius: '16px',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
+                }}>
+                  <h4 style={{ color: '#1e293b', marginBottom: '20px', fontSize: '18px' }}>Informações de Localização</h4>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+                    <div>
+                      <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#374151' }}>Endereço:</label>
+                      {isEditingLocation ? (
+                        <input 
+                          type="text" 
+                          value={locationData.endereco}
+                          onChange={(e) => setLocationData({...locationData, endereco: e.target.value})}
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            border: '2px solid #3b82f6',
+                            borderRadius: '8px',
+                            fontSize: '14px'
+                          }} 
+                        />
+                      ) : (
+                        <div style={{
+                          padding: '12px',
+                          background: '#f9fafb',
+                          borderRadius: '8px',
+                          fontSize: '14px',
+                          color: '#374151'
+                        }}>
+                          {locationData.endereco}
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#374151' }}>Complemento:</label>
+                      {isEditingLocation ? (
+                        <input 
+                          type="text" 
+                          value={locationData.complemento}
+                          onChange={(e) => setLocationData({...locationData, complemento: e.target.value})}
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            border: '2px solid #3b82f6',
+                            borderRadius: '8px',
+                            fontSize: '14px'
+                          }} 
+                        />
+                      ) : (
+                        <div style={{
+                          padding: '12px',
+                          background: '#f9fafb',
+                          borderRadius: '8px',
+                          fontSize: '14px',
+                          color: '#374151'
+                        }}>
+                          {locationData.complemento}
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#374151' }}>Bairro:</label>
+                      {isEditingLocation ? (
+                        <input 
+                          type="text" 
+                          value={locationData.bairro}
+                          onChange={(e) => setLocationData({...locationData, bairro: e.target.value})}
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            border: '2px solid #3b82f6',
+                            borderRadius: '8px',
+                            fontSize: '14px'
+                          }} 
+                        />
+                      ) : (
+                        <div style={{
+                          padding: '12px',
+                          background: '#f9fafb',
+                          borderRadius: '8px',
+                          fontSize: '14px',
+                          color: '#374151'
+                        }}>
+                          {locationData.bairro}
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#374151' }}>Cidade:</label>
+                      {isEditingLocation ? (
+                        <input 
+                          type="text" 
+                          value={locationData.cidade}
+                          onChange={(e) => setLocationData({...locationData, cidade: e.target.value})}
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            border: '2px solid #3b82f6',
+                            borderRadius: '8px',
+                            fontSize: '14px'
+                          }} 
+                        />
+                      ) : (
+                        <div style={{
+                          padding: '12px',
+                          background: '#f9fafb',
+                          borderRadius: '8px',
+                          fontSize: '14px',
+                          color: '#374151'
+                        }}>
+                          {locationData.cidade}
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#374151' }}>CEP:</label>
+                      {isEditingLocation ? (
+                        <input 
+                          type="text" 
+                          value={locationData.cep}
+                          onChange={(e) => setLocationData({...locationData, cep: e.target.value})}
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            border: '2px solid #3b82f6',
+                            borderRadius: '8px',
+                            fontSize: '14px'
+                          }} 
+                        />
+                      ) : (
+                        <div style={{
+                          padding: '12px',
+                          background: '#f9fafb',
+                          borderRadius: '8px',
+                          fontSize: '14px',
+                          color: '#374151'
+                        }}>
+                          {locationData.cep}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div style={{ marginBottom: '20px' }}>
+                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#374151' }}>Imagem da Clínica:</label>
+                    <div style={{
+                      border: '2px dashed #d1d5db',
+                      borderRadius: '12px',
+                      padding: '40px',
+                      textAlign: 'center',
+                      background: '#f9fafb'
+                    }}>
+                      <input type="file" accept="image/*" style={{ display: 'none' }} id="clinic-image" />
+                      <label htmlFor="clinic-image" style={{
+                        cursor: 'pointer',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: '10px'
+                      }}>
+                        <div style={{ fontSize: '48px', color: '#9ca3af' }}>📷</div>
+                        <div style={{ color: '#6b7280', fontSize: '16px' }}>Clique para adicionar uma imagem</div>
+                        <div style={{ color: '#9ca3af', fontSize: '14px' }}>PNG, JPG até 5MB</div>
+                      </label>
+                    </div>
+                  </div>
+                  
+                  <div style={{ display: 'flex', gap: '15px' }}>
+                    {isEditingLocation ? (
+                      <>
+                        <button 
+                          onClick={() => {
+                            setIsEditingLocation(false)
+                            alert('Informações salvas com sucesso!')
+                          }}
+                          style={{
+                            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                            color: 'white',
+                            border: 'none',
+                            padding: '12px 24px',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            fontWeight: '600'
+                          }}
+                        >
+                          Salvar Alterações
+                        </button>
+                        <button 
+                          onClick={() => {
+                            setIsEditingLocation(false)
+                            setLocationData({
+                              endereco: 'Rua das Clínicas, 123',
+                              complemento: 'Sala 101',
+                              bairro: 'Centro',
+                              cidade: 'São Paulo',
+                              cep: '01234-567'
+                            })
+                          }}
+                          style={{
+                            background: '#f3f4f6',
+                            color: '#374151',
+                            border: 'none',
+                            padding: '12px 24px',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            fontWeight: '600'
+                          }}
+                        >
+                          Cancelar
+                        </button>
+                      </>
+                    ) : (
+                      <button 
+                        onClick={() => setIsEditingLocation(true)}
+                        style={{
+                          background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+                          color: 'white',
+                          border: 'none',
+                          padding: '12px 24px',
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                          fontWeight: '600'
+                        }}
+                      >
+                        Editar Localização
+                      </button>
+                    )}
                   </div>
                 </div>
-                <div className="notification-item unread">
-                  <div className="notification-icon">⚠️</div>
-                  <div className="notification-content">
-                    <h4>Cancelamento de consulta</h4>
-                    <p>João Santos cancelou a consulta de amanhã às 10:00</p>
-                    <span className="notification-time">Há 3 horas</span>
-                  </div>
-                </div>
-                <div className="notification-item unread">
-                  <div className="notification-content">
-                    <h4>Lembrete de agenda</h4>
-                    <p>Você tem 5 consultas agendadas para hoje</p>
-                    <span className="notification-time">Há 6 horas</span>
-                  </div>
-                </div>
-              </div>
-              <div className="notification-actions">
-                <button className="primary-btn">Marcar todas como lidas</button>
-                <button className="secondary-btn">Configurações</button>
               </div>
             </div>
           </div>
@@ -807,7 +1308,7 @@ const AreaProfissional = () => {
       case 'perfil':
         return (
           <div className="section-content">
-            <h2>👤 Meu Perfil</h2>
+            <h2>Meu Perfil</h2>
             <div className="profile-card">
               <div className="profile-header">
                 <div className="profile-avatar">
@@ -827,7 +1328,43 @@ const AreaProfissional = () => {
                   <div className="detail-grid">
                     <div className="detail-item">
                       <label>Nome Completo</label>
-                      <span>Dr. João Santos Silva</span>
+                      {isEditingName ? (
+                        <div className="edit-field">
+                          <input 
+                            type="text" 
+                            value={editedName}
+                            onChange={(e) => setEditedName(e.target.value)}
+                            className="edit-input"
+                          />
+                          <div className="edit-actions">
+                            <button 
+                              className="save-btn"
+                              onClick={() => setIsEditingName(false)}
+                            >
+                              ✓
+                            </button>
+                            <button 
+                              className="cancel-btn"
+                              onClick={() => {
+                                setEditedName('Dr. João Santos Silva')
+                                setIsEditingName(false)
+                              }}
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="view-field">
+                          <span>{editedName}</span>
+                          <button 
+                            className="edit-btn"
+                            onClick={() => setIsEditingName(true)}
+                          >
+                            ✏️
+                          </button>
+                        </div>
+                      )}
                     </div>
                     <div className="detail-item">
                       <label>CRP</label>
@@ -839,11 +1376,83 @@ const AreaProfissional = () => {
                     </div>
                     <div className="detail-item">
                       <label>Email</label>
-                      <span>dr.joao@adcpsicologia.com</span>
+                      {isEditingEmail ? (
+                        <div className="edit-field">
+                          <input 
+                            type="email" 
+                            value={editedEmail}
+                            onChange={(e) => setEditedEmail(e.target.value)}
+                            className="edit-input"
+                          />
+                          <div className="edit-actions">
+                            <button 
+                              className="save-btn"
+                              onClick={() => setIsEditingEmail(false)}
+                            >
+                              ✓
+                            </button>
+                            <button 
+                              className="cancel-btn"
+                              onClick={() => {
+                                setEditedEmail('dr.joao@adcpsicologia.com')
+                                setIsEditingEmail(false)
+                              }}
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="view-field">
+                          <span>{editedEmail}</span>
+                          <button 
+                            className="edit-btn"
+                            onClick={() => setIsEditingEmail(true)}
+                          >
+                            ✏️
+                          </button>
+                        </div>
+                      )}
                     </div>
                     <div className="detail-item">
                       <label>Telefone</label>
-                      <span>(11) 98888-8888</span>
+                      {isEditingPhone ? (
+                        <div className="edit-field">
+                          <input 
+                            type="tel" 
+                            value={editedPhone}
+                            onChange={(e) => setEditedPhone(e.target.value)}
+                            className="edit-input"
+                          />
+                          <div className="edit-actions">
+                            <button 
+                              className="save-btn"
+                              onClick={() => setIsEditingPhone(false)}
+                            >
+                              ✓
+                            </button>
+                            <button 
+                              className="cancel-btn"
+                              onClick={() => {
+                                setEditedPhone('(11) 98888-8888')
+                                setIsEditingPhone(false)
+                              }}
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="view-field">
+                          <span>{editedPhone}</span>
+                          <button 
+                            className="edit-btn"
+                            onClick={() => setIsEditingPhone(true)}
+                          >
+                            ✏️
+                          </button>
+                        </div>
+                      )}
                     </div>
                     <div className="detail-item">
                       <label>Formação</label>
@@ -851,34 +1460,11 @@ const AreaProfissional = () => {
                     </div>
                   </div>
                 </div>
-                
-                <div className="detail-section">
-                  <h4>Configurações de Atendimento</h4>
-                  <div className="detail-grid">
-                    <div className="detail-item">
-                      <label>Valor da Consulta</label>
-                      <span>R$ 150,00</span>
-                    </div>
-                    <div className="detail-item">
-                      <label>Duração da Sessão</label>
-                      <span>50 minutos</span>
-                    </div>
-                    <div className="detail-item">
-                      <label>Atendimento Online</label>
-                      <span>Ativo</span>
-                    </div>
-                    <div className="detail-item">
-                      <label>Atendimento Presencial</label>
-                      <span>Ativo</span>
-                    </div>
-                  </div>
-                </div>
+
               </div>
               
               <div className="profile-actions">
-                <button className="primary-btn">Editar Perfil</button>
-                <button className="secondary-btn">Alterar Senha</button>
-                <button className="secondary-btn">Configurações de Atendimento</button>
+                <button className="secondary-btn" onClick={() => navigate('/alterar-senha')}>Alterar Senha</button>
               </div>
             </div>
           </div>
@@ -890,9 +1476,9 @@ const AreaProfissional = () => {
 
   return (
     <div className="area-profissional">
-      <div className="sidebar">
+      <div className="sidebar-fixed">
         <div className="sidebar-header">
-          <h2>👨⚕️ ADC Pro</h2>
+          <h2>ADC</h2>
         </div>
         
         <nav className="sidebar-nav">
@@ -902,37 +1488,60 @@ const AreaProfissional = () => {
               className={`nav-item ${activeSection === item.id ? 'active' : ''}`}
               onClick={() => setActiveSection(item.id)}
             >
-              <span className="nav-icon">{item.icon}</span>
               <span className="nav-label">{item.label}</span>
             </button>
           ))}
         </nav>
         
         <div className="sidebar-footer">
-          <button className="nav-item" onClick={() => setActiveSection('notificacoes')}>
-            <span className="nav-icon">🔔</span>
+          <button
+            className={`nav-item ${activeSection === 'notificacoes' ? 'active' : ''}`}
+            onClick={() => setActiveSection('notificacoes')}
+          >
             <span className="nav-label">Notificações</span>
-            {notifications > 0 && <span className="notification-badge">{notifications}</span>}
+            {unreadNotifications > 0 && <span className="notification-badge">{unreadNotifications}</span>}
           </button>
           
-          <button className="nav-item" onClick={() => setActiveSection('perfil')}>
-            <span className="nav-icon">👤</span>
+          <button
+            className={`nav-item ${activeSection === 'perfil' ? 'active' : ''}`}
+            onClick={() => setActiveSection('perfil')}
+          >
             <span className="nav-label">Meu Perfil</span>
           </button>
           
           <button className="nav-item logout" onClick={handleLogout}>
-            <span className="nav-icon">🚪</span>
             <span className="nav-label">Sair</span>
           </button>
+          
+
         </div>
       </div>
       
       <div className="main-content">
-        <header className="top-header">
-          <h1>Bem-vindo, Dr. Psicólogo</h1>
+        <header 
+          className="top-header" 
+          style={{
+            position: 'sticky',
+            top: 0,
+            zIndex: 100,
+            background: 'white',
+            borderBottom: '1px solid #e5e7eb',
+            padding: isScrolled ? '10px 30px' : '20px 30px',
+            transition: 'all 0.3s ease',
+            boxShadow: isScrolled ? '0 2px 10px rgba(0,0,0,0.1)' : 'none'
+          }}
+        >
+          <h1 style={{
+            color: '#1e293b',
+            margin: 0,
+            fontSize: isScrolled ? '18px' : '24px',
+            transition: 'all 0.3s ease'
+          }}>
+            {isScrolled ? 'Dr. Psicólogo' : 'Bem-vindo, Dr. Psicólogo'}
+          </h1>
         </header>
         
-        <div className="content-area">
+        <div className="content-area" style={{ paddingTop: '20px' }}>
           {renderContent()}
         </div>
       </div>

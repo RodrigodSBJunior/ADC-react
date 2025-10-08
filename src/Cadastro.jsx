@@ -2,6 +2,11 @@ import './Cadastro.css'
 import Calendar from './Calendar'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import logo from './assets/shared image.png'
+import pacienteImg from './assets/paciente.png'
+import pacienteHoverImg from './assets/paciente (1).png'
+import psicologiaImg from './assets/psicologia.png'
+import psicologiaSelectedImg from './assets/psicologia (1).png'
 
 const Cadastro = () => {
   const [userType, setUserType] = useState('')
@@ -122,7 +127,11 @@ const Cadastro = () => {
   return (
     <div className="cadastro-container">
       <button className="back-btn" onClick={handleBack}>← Voltar</button>
-      <div className="cadastro-card">
+      <div className="content-wrapper">
+        <div className="logo-section">
+          <img src={logo} alt="ADC Psicologia" />
+        </div>
+        <div className="cadastro-card">
         <h1>Criar Conta</h1>
         <p>Preencha os dados para se cadastrar</p>
         
@@ -134,10 +143,17 @@ const Cadastro = () => {
                 userType === "paciente" ? "selected" : ""
               }`}
               onClick={() => setUserType("paciente")}
+              onMouseEnter={(e) => {
+                const img = e.currentTarget.querySelector('.card-image');
+                if (img) img.src = pacienteHoverImg;
+              }}
+              onMouseLeave={(e) => {
+                const img = e.currentTarget.querySelector('.card-image');
+                if (img) img.src = pacienteImg;
+              }}
             >
-              <div className="card-icon">👤</div>
+              <img src={pacienteImg} alt="Paciente" className="card-image" />
               <h4>Paciente</h4>
-              <p>Agendar consultas</p>
             </div>
             <div
               className={`user-card ${
@@ -145,9 +161,8 @@ const Cadastro = () => {
               }`}
               onClick={() => setUserType("profissional")}
             >
-              <div className="card-icon">👨⚕️</div>
+              <img src={userType === "profissional" ? psicologiaSelectedImg : psicologiaImg} alt="Profissional" className="card-image" />
               <h4>Profissional</h4>
-              <p>Gerenciar agenda</p>
             </div>
           </div>
         </div>
@@ -192,27 +207,13 @@ const Cadastro = () => {
           
           <div className="input-row">
             <div className="input-group">
-              <div className="date-input-wrapper">
-                <input 
-                  type="date" 
-                  value={birthDate}
-                  onChange={handleDateChange}
-                  className={ageError ? 'error' : ''}
-                  required 
-                />
-                <div className="calendar-icon-inside" onClick={() => {
-                  try {
-                    const dateInput = document.querySelector('input[type="date"]');
-                    if (dateInput && dateInput.showPicker) {
-                      dateInput.showPicker();
-                    }
-                  } catch (error) {
-                    console.log('showPicker not supported');
-                  }
-                }}>
-                  📅
-                </div>
-              </div>
+              <input 
+                type="date" 
+                value={birthDate}
+                onChange={handleDateChange}
+                className={ageError ? 'error' : ''}
+                required 
+              />
               {ageError && <div className="error-message">{ageError}</div>}
             </div>
             <div className="input-group">
@@ -265,6 +266,7 @@ const Cadastro = () => {
           <button type="submit" className="cadastro-btn" disabled={!acceptTerms || !userType}>Criar Conta</button>
           <button type="button" className="login-link-btn" onClick={handleLogin}>Já tenho conta</button>
         </form>
+        </div>
       </div>
     </div>
   )

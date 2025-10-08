@@ -17,7 +17,7 @@ body {
     justify-content: center;
     align-items: center;
     padding: 40px 60px;
-    background: linear-gradient(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.6)), url('./assets/ChatGPT Image 8 de out. de 2025, 09_44_08.png');
+    background: url('./assets/ChatGPT Image 8 de out. de 2025, 09_44_08.png');
     background-size: cover;
     background-position: center 80%;
     background-repeat: no-repeat;
@@ -35,8 +35,8 @@ body {
     background: linear-gradient(135deg, #1e3a8a, #3b82f6);
     color: white;
     border: none;
-    padding: 15px 30px;
-    font-size: 1rem;
+    padding: 20px 40px;
+    font-size: 1.2rem;
     font-weight: 500;
     border-radius: 25px;
     cursor: pointer;
