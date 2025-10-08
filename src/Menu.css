@@ -1,6 +1,6 @@
 #header {
     height: 100px;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.8));
+    background: white;
     display: flex;
     align-items: center;
     position: fixed;

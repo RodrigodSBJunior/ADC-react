@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import play from "./assets/play.jpeg";
 import blz from "./assets/blz.jpeg";
 import mao from "./assets/mao.jpeg";
-import chatgptImage from "./assets/ChatGPT Image 4 de out. de 2025, 18_24_13.png";
+import chatgptImage from "./assets/ChatGPT Image 8 de out. de 2025, 09_06_54.png";
 import Menu from "./Menu";
 import Footer from "./pages/menu/Footer";
 import "./Home.css";
