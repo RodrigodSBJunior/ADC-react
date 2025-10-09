@@ -91,12 +91,7 @@ html, body {
   border-right: 4px solid #fbbf24;
 }
 
-.nav-icon {
-  font-size: 1.2rem;
-  width: 24px;
-  text-align: center;
-  flex-shrink: 0;
-}
+
 
 .nav-label {
   font-size: 0.9rem;
