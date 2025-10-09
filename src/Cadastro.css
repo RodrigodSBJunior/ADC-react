@@ -36,26 +36,6 @@ body, html {
   pointer-events: none;
   padding: 20px;
   gap: 40px;
-  padding: 20px;
-  overflow-y: auto;
-  position: relative;
-  gap: 40px;
-}
-
-.cadastro-container::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(255, 187, 14, 0.1) 0%, transparent 70%);
-  animation: float 6s ease-in-out infinite;
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-20px) rotate(180deg); }
 }
 
 .back-btn {
@@ -102,8 +82,7 @@ body, html {
 }
 
 .cadastro-card {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
+  background: white;
   padding: 10px 25px;
   border-radius: 20px;
   box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.1);
