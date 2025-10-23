@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import './AreaProfissional.css'
 import { useNavigate } from 'react-router-dom'
+import ApiService from './services/api'
 
 const AreaProfissional = () => {
   const [activeSection, setActiveSection] = useState('dashboard')
@@ -48,12 +49,13 @@ const AreaProfissional = () => {
     { id: 2, icon: '⚠️', title: 'Cancelamento de consulta', message: 'João Santos cancelou a consulta de amanhã às 10:00', time: 'Há 3 horas', read: false },
     { id: 3, icon: '🔔', title: 'Lembrete de agenda', message: 'Você tem 5 consultas agendadas para hoje', time: 'Há 6 horas', read: false }
   ])
+  const [usuario, setUsuario] = useState(null)
   const [isEditingName, setIsEditingName] = useState(false)
-  const [editedName, setEditedName] = useState('Dr. João Santos Silva')
+  const [editedName, setEditedName] = useState('')
   const [isEditingEmail, setIsEditingEmail] = useState(false)
-  const [editedEmail, setEditedEmail] = useState('dr.joao@adcpsicologia.com')
+  const [editedEmail, setEditedEmail] = useState('')
   const [isEditingPhone, setIsEditingPhone] = useState(false)
-  const [editedPhone, setEditedPhone] = useState('(11) 98888-8888')
+  const [editedPhone, setEditedPhone] = useState('')
   const unreadNotifications = useMemo(() => notificationsList.filter(n => !n.read).length, [notificationsList])
   const navigate = useNavigate();
 
@@ -65,6 +67,37 @@ const AreaProfissional = () => {
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
+
+  useEffect(() => {
+    const usuarioLogado = localStorage.getItem('usuario');
+    if (usuarioLogado) {
+      const dadosUsuario = JSON.parse(usuarioLogado);
+      setUsuario(dadosUsuario);
+      setEditedName(dadosUsuario.nome || '');
+      setEditedEmail(dadosUsuario.email || '');
+      setEditedPhone(dadosUsuario.telefone || '');
+    }
+  }, []);
+
+  const salvarAlteracoesPerfil = async (campo, valor) => {
+    try {
+      if (!usuario?.id) return;
+      
+      const dadosAtualizados = {
+        ...usuario,
+        [campo]: valor
+      };
+      
+      const usuarioAtualizado = await ApiService.atualizarPerfil(usuario.id, dadosAtualizados);
+      
+      setUsuario(usuarioAtualizado);
+      localStorage.setItem('usuario', JSON.stringify(usuarioAtualizado));
+      
+      alert('Perfil atualizado com sucesso!');
+    } catch (error) {
+      alert('Erro ao atualizar perfil: ' + error.message);
+    }
+  };
 
   const handleLogout = () => {
     navigate('/')
@@ -1378,9 +1411,9 @@ const AreaProfissional = () => {
                   <button className="change-photo-btn">Alterar Foto</button>
                 </div>
                 <div className="profile-info">
-                  <h3>Dr. João Santos</h3>
-                  <p className="profile-type">Psicólogo Clínico</p>
-                  <p className="member-since">CRP: 06/123456 | Ativo desde: Janeiro 2020</p>
+                  <h3>{usuario?.nome || 'Profissional'}</h3>
+                  <p className="profile-type">{usuario?.tipoUsuario || 'Profissional'}</p>
+                  <p className="member-since">Ativo desde: {usuario?.dataCadastro ? new Date(usuario.dataCadastro).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }) : 'N/A'}</p>
                 </div>
               </div>
               
@@ -1401,7 +1434,10 @@ const AreaProfissional = () => {
                           <div className="edit-actions">
                             <button 
                               className="save-btn"
-                              onClick={() => setIsEditingName(false)}
+                              onClick={async () => {
+                                await salvarAlteracoesPerfil('nome', editedName);
+                                setIsEditingName(false);
+                              }}
                             >
                               ✓
                             </button>
@@ -1449,7 +1485,10 @@ const AreaProfissional = () => {
                           <div className="edit-actions">
                             <button 
                               className="save-btn"
-                              onClick={() => setIsEditingEmail(false)}
+                              onClick={async () => {
+                                await salvarAlteracoesPerfil('email', editedEmail);
+                                setIsEditingEmail(false);
+                              }}
                             >
                               ✓
                             </button>
@@ -1489,7 +1528,10 @@ const AreaProfissional = () => {
                           <div className="edit-actions">
                             <button 
                               className="save-btn"
-                              onClick={() => setIsEditingPhone(false)}
+                              onClick={async () => {
+                                await salvarAlteracoesPerfil('telefone', editedPhone);
+                                setIsEditingPhone(false);
+                              }}
                             >
                               ✓
                             </button>
@@ -1599,7 +1641,7 @@ const AreaProfissional = () => {
             fontSize: isScrolled ? '18px' : '24px',
             transition: 'all 0.3s ease'
           }}>
-            {isScrolled ? 'Dr. Psicólogo' : 'Bem-vindo, Dr. Psicólogo'}
+            {isScrolled ? (usuario?.nome?.split(' ')[0] || 'Dr.') : `Bem-vindo, ${usuario?.nome || 'Profissional'}`}
           </h1>
         </header>
         

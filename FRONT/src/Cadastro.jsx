@@ -7,10 +7,15 @@ import pacienteImg from './assets/paciente.png'
 import pacienteHoverImg from './assets/paciente (1).png'
 import psicologiaImg from './assets/psicologia.png'
 import psicologiaSelectedImg from './assets/psicologia (1).png'
+import ApiService from './services/api'
 
 const Cadastro = () => {
   const [userType, setUserType] = useState('')
+  const [nome, setNome] = useState('')
+  const [cpf, setCpf] = useState('')
+  const [telefone, setTelefone] = useState('')
   const [birthDate, setBirthDate] = useState('')
+  const [sexo, setSexo] = useState('')
   const [ageError, setAgeError] = useState('')
   const [email, setEmail] = useState('')
   const [confirmEmail, setConfirmEmail] = useState('')
@@ -19,6 +24,8 @@ const Cadastro = () => {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [passwordError, setPasswordError] = useState('')
   const [acceptTerms, setAcceptTerms] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
   const navigate = useNavigate();
 
   const handleBack = () => {
@@ -29,12 +36,38 @@ const Cadastro = () => {
     navigate('/entrar');
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (userType === 'profissional') {
-      navigate('/areaprofissional');
-    } else {
-      navigate('/areapaciente');
+    setLoading(true);
+    setError('');
+
+    try {
+      const userData = {
+        nome,
+        email,
+        senha: password,
+        cpf,
+        telefone,
+        dataNascimento: birthDate,
+        sexo,
+        tipoUsuario: userType.toUpperCase()
+      };
+
+      const response = await ApiService.cadastrarUsuario(userData);
+      
+      // Salvar dados do usuário no localStorage
+      localStorage.setItem('usuario', JSON.stringify(response));
+      
+      // Redirecionar baseado no tipo de usuário
+      if (userType === 'profissional') {
+        navigate('/areaprofissional');
+      } else {
+        navigate('/areapaciente');
+      }
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -167,17 +200,37 @@ const Cadastro = () => {
           </div>
         </div>
         
+        {error && <div className="error-message" style={{color: 'red', marginBottom: '10px'}}>{error}</div>}
+        
         <form className="cadastro-form" onSubmit={handleSubmit}>
           <div className="input-group">
-            <input type="text" placeholder="Nome completo" required />
+            <input 
+              type="text" 
+              placeholder="Nome completo" 
+              value={nome}
+              onChange={(e) => setNome(e.target.value)}
+              required 
+            />
           </div>
           
           <div className="input-row">
             <div className="input-group">
-              <input type="text" placeholder="CPF" required />
+              <input 
+                type="text" 
+                placeholder="CPF" 
+                value={cpf}
+                onChange={(e) => setCpf(e.target.value)}
+                required 
+              />
             </div>
             <div className="input-group">
-              <input type="tel" placeholder="Telefone" required />
+              <input 
+                type="tel" 
+                placeholder="Telefone" 
+                value={telefone}
+                onChange={(e) => setTelefone(e.target.value)}
+                required 
+              />
             </div>
           </div>
           
@@ -217,7 +270,11 @@ const Cadastro = () => {
               {ageError && <div className="error-message">{ageError}</div>}
             </div>
             <div className="input-group">
-              <select required>
+              <select 
+                value={sexo}
+                onChange={(e) => setSexo(e.target.value)}
+                required
+              >
                 <option value="">Sexo</option>
                 <option value="M">M</option>
                 <option value="F">F</option>
@@ -263,7 +320,13 @@ const Cadastro = () => {
             </label>
           </div>
           
-          <button type="submit" className="cadastro-btn" disabled={!acceptTerms || !userType}>Criar Conta</button>
+          <button 
+            type="submit" 
+            className="cadastro-btn" 
+            disabled={!acceptTerms || !userType || loading}
+          >
+            {loading ? 'Criando conta...' : 'Criar Conta'}
+          </button>
           <button type="button" className="login-link-btn" onClick={handleLogin}>Já tenho conta</button>
         </form>
         </div>

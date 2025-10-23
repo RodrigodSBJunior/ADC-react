@@ -1,7 +1,8 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './AreaPaciente.css'
 import SidebarPaciente from './SidebarPaciente'
+import ApiService from './services/api'
 
 const AreaPaciente = () => {
   const [activeSection, setActiveSection] = useState('dashboard')
@@ -9,12 +10,13 @@ const AreaPaciente = () => {
   const [selectedTime, setSelectedTime] = useState(null)
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth())
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear())
+  const [usuario, setUsuario] = useState(null)
   const [isEditingName, setIsEditingName] = useState(false)
-  const [editedName, setEditedName] = useState('Maria Silva Santos')
+  const [editedName, setEditedName] = useState('')
   const [isEditingEmail, setIsEditingEmail] = useState(false)
-  const [editedEmail, setEditedEmail] = useState('maria.silva@email.com')
+  const [editedEmail, setEditedEmail] = useState('')
   const [isEditingPhone, setIsEditingPhone] = useState(false)
-  const [editedPhone, setEditedPhone] = useState('(11) 99999-9999')
+  const [editedPhone, setEditedPhone] = useState('')
   const [scheduledAppointments, setScheduledAppointments] = useState([
     { id: 1, doctor: 'Dr. João Silva', date: '15/01/2025', time: '14:00', status: 'Confirmado' },
     { id: 2, doctor: 'Dra. Maria Santos', date: '18/01/2025', time: '10:00', status: 'Confirmado' },
@@ -39,6 +41,37 @@ const AreaPaciente = () => {
     { id: 5, icon: '💳', title: 'Pagamento processado', message: 'Pagamento da consulta de 10/01 foi processado com sucesso', time: 'Há 2 dias', read: false }
   ])
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const usuarioLogado = localStorage.getItem('usuario');
+    if (usuarioLogado) {
+      const dadosUsuario = JSON.parse(usuarioLogado);
+      setUsuario(dadosUsuario);
+      setEditedName(dadosUsuario.nome || '');
+      setEditedEmail(dadosUsuario.email || '');
+      setEditedPhone(dadosUsuario.telefone || '');
+    }
+  }, []);
+
+  const salvarAlteracoesPerfil = async (campo, valor) => {
+    try {
+      if (!usuario?.id) return;
+      
+      const dadosAtualizados = {
+        ...usuario,
+        [campo]: valor
+      };
+      
+      const usuarioAtualizado = await ApiService.atualizarPerfil(usuario.id, dadosAtualizados);
+      
+      setUsuario(usuarioAtualizado);
+      localStorage.setItem('usuario', JSON.stringify(usuarioAtualizado));
+      
+      alert('Perfil atualizado com sucesso!');
+    } catch (error) {
+      alert('Erro ao atualizar perfil: ' + error.message);
+    }
+  };
 
   const availableSlots = useMemo(() => {
     const slots = {}
@@ -460,9 +493,9 @@ const AreaPaciente = () => {
                   <button className="change-photo-btn">Alterar Foto</button>
                 </div>
                 <div className="profile-info">
-                  <h3>Maria Silva</h3>
-                  <p className="profile-type">Paciente</p>
-                  <p className="member-since">Membro desde: Janeiro 2024</p>
+                  <h3>{usuario?.nome || 'Usuário'}</h3>
+                  <p className="profile-type">{usuario?.tipoUsuario || 'Paciente'}</p>
+                  <p className="member-since">Membro desde: {usuario?.dataCadastro ? new Date(usuario.dataCadastro).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }) : 'N/A'}</p>
                 </div>
               </div>
               
@@ -483,14 +516,17 @@ const AreaPaciente = () => {
                           <div className="edit-actions">
                             <button 
                               className="save-btn"
-                              onClick={() => setIsEditingName(false)}
+                              onClick={async () => {
+                                await salvarAlteracoesPerfil('nome', editedName);
+                                setIsEditingName(false);
+                              }}
                             >
                               ✓
                             </button>
                             <button 
                               className="cancel-btn"
                               onClick={() => {
-                                setEditedName('Maria Silva Santos')
+                                setEditedName(usuario?.nome || '')
                                 setIsEditingName(false)
                               }}
                             >
@@ -523,7 +559,10 @@ const AreaPaciente = () => {
                           <div className="edit-actions">
                             <button 
                               className="save-btn"
-                              onClick={() => setIsEditingEmail(false)}
+                              onClick={async () => {
+                                await salvarAlteracoesPerfil('email', editedEmail);
+                                setIsEditingEmail(false);
+                              }}
                             >
                               ✓
                             </button>
@@ -552,7 +591,7 @@ const AreaPaciente = () => {
                     </div>
                     <div className="detail-item">
                       <label>CPF</label>
-                      <span>123.456.789-00</span>
+                      <span>{usuario?.cpf || 'N/A'}</span>
                     </div>
                     <div className="detail-item">
                       <label>Telefone</label>
@@ -567,7 +606,10 @@ const AreaPaciente = () => {
                           <div className="edit-actions">
                             <button 
                               className="save-btn"
-                              onClick={() => setIsEditingPhone(false)}
+                              onClick={async () => {
+                                await salvarAlteracoesPerfil('telefone', editedPhone);
+                                setIsEditingPhone(false);
+                              }}
                             >
                               ✓
                             </button>
@@ -596,7 +638,7 @@ const AreaPaciente = () => {
                     </div>
                     <div className="detail-item">
                       <label>Data de Nascimento</label>
-                      <span>15/03/1990</span>
+                      <span>{usuario?.dataNascimento ? new Date(usuario.dataNascimento).toLocaleDateString('pt-BR') : 'N/A'}</span>
                     </div>
                   </div>
                 </div>
@@ -653,7 +695,7 @@ const AreaPaciente = () => {
       />
       <div className="main-content">
         <header className="top-header">
-          <h1>Bem-vindo ao Dashboard</h1>
+          <h1>Bem-vindo, {usuario?.nome || 'Usuário'}</h1>
         </header>
         
         <div className="content-area">

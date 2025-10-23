@@ -6,9 +6,14 @@ import pacienteImg from './assets/paciente.png';
 import pacienteHoverImg from './assets/paciente (1).png';
 import psicologiaImg from './assets/psicologia.png';
 import psicologiaSelectedImg from './assets/psicologia (1).png';
+import ApiService from './services/api';
 
 const Entrar = () => {
   const [userType, setUserType] = useState('');
+  const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
   
   const handleBack = () => {
@@ -19,12 +24,33 @@ const Entrar = () => {
     navigate('/cadastro');
   };
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    if (userType === 'profissional') {
-      navigate('/areaprofissional');
-    } else {
-      navigate('/areapaciente');
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await ApiService.login(email, senha);
+      const usuario = response.usuario;
+      
+      // Verificar se o tipo de usuário corresponde ao selecionado
+      if (usuario.tipoUsuario.toLowerCase() !== userType) {
+        throw new Error('Tipo de usuário não corresponde ao selecionado');
+      }
+      
+      // Salvar dados do usuário no localStorage
+      localStorage.setItem('usuario', JSON.stringify(usuario));
+      
+      // Redirecionar baseado no tipo de usuário
+      if (userType === 'profissional') {
+        navigate('/areaprofissional');
+      } else {
+        navigate('/areapaciente');
+      }
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -72,12 +98,26 @@ const Entrar = () => {
           </div>
         </div>
 
+        {error && <div className="error-message" style={{color: 'red', marginBottom: '10px'}}>{error}</div>}
+        
         <form className="login-form" onSubmit={handleLogin}>
           <div className="input-group">
-            <input type="email" placeholder="Email" required />
+            <input 
+              type="email" 
+              placeholder="Email" 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required 
+            />
           </div>
           <div className="input-group">
-            <input type="password" placeholder="Senha" required />
+            <input 
+              type="password" 
+              placeholder="Senha" 
+              value={senha}
+              onChange={(e) => setSenha(e.target.value)}
+              required 
+            />
             <button 
               type="button" 
               className="forgot-password"
@@ -89,9 +129,9 @@ const Entrar = () => {
           <button 
             type="submit" 
             className="login-btn"
-            disabled={!userType}
+            disabled={!userType || loading}
           >
-            Entrar
+            {loading ? 'Entrando...' : 'Entrar'}
           </button>
           <button
             type="button"
